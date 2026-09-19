@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class 9 Aptitude Test Master Portal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- MathJax for TeX equations -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .option-card {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .option-card:hover:not(.disabled) {
+            transform: translateY(-1px);
+            border-color: #6366f1;
+            background-color: #f5f3ff;
+        }
+        .selected-option {
+            border-color: #4f46e5 !important;
+            background-color: #e0e7ff !important;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+        }
+        .correct-option {
+            border-color: #10b981 !important;
+            background-color: #d1fae5 !important;
+            color: #065f46 !important;
+        }
+        .incorrect-option {
+            border-color: #ef4444 !important;
+            background-color: #fee2e2 !important;
+            color: #991b1b !important;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; color: black; }
+            .card-print { border: 1px solid #ccc; page-break-inside: avoid; margin-bottom: 1.5rem; padding: 1rem; }
+        }
+    </style>
+
+<script>
+(function () {
+    const name = localStorage.getItem('delta_onboard_name');
+    const studentClass = localStorage.getItem('delta_onboard_class');
+    const board = localStorage.getItem('delta_onboard_board');
+
+    // Expose onboarding information to the aptitude application.
+    window.DELTA_STUDENT_PROFILE = {
+        name: name || '',
+        studentClass: studentClass || '',
+        board: board || ''
+    };
+})();
+</script>
+
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+    <!-- Navigation Header -->
+    <header class="bg-indigo-900 text-white shadow-lg sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand Title -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('practice')">
+                    <div class="bg-indigo-500 p-2 rounded-xl text-white shadow-inner">
+                        <i class="fa-solid fa-graduation-cap text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight tracking-wide">Class 9 Aptitude Engine</h1>
+                        <p class="text-xs text-indigo-300">50 Level-Graded Standardized Questions</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <nav class="hidden md:flex space-x-1">
+                    <button id="nav-practice" onclick="switchTab('practice')" class="px-4 py-2 rounded-lg text-sm font-medium transition text-white bg-indigo-800">
+                        <i class="fa-solid fa-book-open mr-1.5"></i> Practice Mode
+                    </button>
+                    <button id="nav-exam" onclick="switchTab('exam')" class="px-4 py-2 rounded-lg text-sm font-medium transition text-indigo-200 hover:text-white hover:bg-indigo-800">
+                        <i class="fa-solid fa-stopwatch mr-1.5"></i> Timed Exam Mode
+                    </button>
+                    <button id="nav-bank" onclick="switchTab('bank')" class="px-4 py-2 rounded-lg text-sm font-medium transition text-indigo-200 hover:text-white hover:bg-indigo-800">
+                        <i class="fa-solid fa-database mr-1.5"></i> Question Bank (50)
+                    </button>
+                </nav>
+
+                <!-- Actions / Export -->
+                <div class="flex items-center gap-2">
+                    <button onclick="exportJSON()" title="Export JSON" class="p-2 text-indigo-200 hover:text-white hover:bg-indigo-800 rounded-lg text-sm font-medium transition">
+                        <i class="fa-solid fa-file-code"></i> <span class="hidden sm:inline ml-1">JSON</span>
+                    </button>
+                    <button onclick="window.print()" title="Print / PDF" class="p-2 text-indigo-200 hover:text-white hover:bg-indigo-800 rounded-lg text-sm font-medium transition">
+                        <i class="fa-solid fa-print"></i> <span class="hidden sm:inline ml-1">Print/PDF</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+
+        <!-- PRACTICE MODE TAB -->
+        <div id="tab-practice" class="space-y-6">
+            <!-- Filter Controls -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 no-print">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Subject Filter</label>
+                        <select id="practice-subject" onchange="filterPractice()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="All">All Subjects (50)</option>
+                            <option value="Mathematics">Mathematics (10)</option>
+                            <option value="Science">Science (10)</option>
+                            <option value="English">English (10)</option>
+                            <option value="Social Science">Social Science (10)</option>
+                            <option value="Logical Reasoning">Logical Reasoning (10)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Difficulty Filter</label>
+                        <select id="practice-difficulty" onchange="filterPractice()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="All">All Levels</option>
+                            <option value="Easy">Easy (4 per subject)</option>
+                            <option value="Moderate">Moderate (3 per subject)</option>
+                            <option value="Hard">Hard (3 per subject)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Search Question</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+                            <input type="text" id="practice-search" oninput="filterPractice()" placeholder="Keyword search..." class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-9 pr-3 py-2 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end pt-5 md:pt-0">
+                        <div class="bg-indigo-50 text-indigo-800 text-xs font-semibold px-4 py-2.5 rounded-xl border border-indigo-100 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-check text-indigo-600"></i>
+                            <span>Filtered Total: <strong id="practice-total-badge" class="text-indigo-900 text-sm">50</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subject Quick Navigation Tabs -->
+            <div class="flex overflow-x-auto gap-2 pb-2 no-print scrollbar-none" id="subject-tabs-container">
+                <!-- Injected via JS -->
+            </div>
+
+            <!-- Practice Question Card -->
+            <div id="practice-card-container" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 relative min-h-[420px] flex flex-col justify-between">
+                <div>
+                    <!-- Card Top Header -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-4 mb-6">
+                        <div class="flex items-center gap-2">
+                            <span id="p-subject-badge" class="bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Mathematics</span>
+                            <span id="p-difficulty-badge" class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Easy</span>
+                        </div>
+                        <span id="p-question-counter" class="text-xs font-bold text-slate-400 uppercase tracking-widest">Question 1 of 10</span>
+                    </div>
+
+                    <!-- Question Body -->
+                    <div id="p-question-text" class="text-base sm:text-lg font-semibold text-slate-800 mb-6 leading-relaxed">
+                        <!-- Text -->
+                    </div>
+
+                    <!-- Options Container -->
+                    <div id="p-options-container" class="grid grid-cols-1 gap-3 mb-6">
+                        <!-- Options injected -->
+                    </div>
+
+                    <!-- Instant Explanation -->
+                    <div id="p-explanation-box" class="hidden rounded-xl p-4 border text-sm leading-relaxed mb-6 transition-all duration-300">
+                        <div class="font-bold mb-1 flex items-center gap-2" id="p-explanation-title">
+                            <i class="fa-solid fa-lightbulb"></i> Explanation
+                        </div>
+                        <div id="p-explanation-text" class="text-slate-700"></div>
+                    </div>
+                </div>
+
+                <!-- Footer Navigation Controls -->
+                <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-5 mt-4 no-print">
+                    <button id="p-prev-btn" onclick="navPractice(-1)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition disabled:opacity-40">
+                        <i class="fa-solid fa-arrow-left mr-1.5"></i> Previous
+                    </button>
+                    
+                    <div class="flex items-center gap-2">
+                        <button id="p-check-btn" onclick="checkPracticeAnswer()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-sm transition">
+                            <i class="fa-solid fa-circle-check mr-1.5"></i> Submit Answer
+                        </button>
+                        <button id="p-next-btn" onclick="navPractice(1)" class="px-5 py-2 bg-slate-800 hover:bg-slate-900 text-white text-sm font-semibold rounded-xl shadow-sm transition">
+                            Next <i class="fa-solid fa-arrow-right ml-1.5"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TIMED EXAM MODE TAB -->
+        <div id="tab-exam" class="hidden space-y-6">
+            <!-- Setup Screen -->
+            <div id="exam-setup" class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 max-w-2xl mx-auto text-center space-y-6">
+                <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto text-2xl">
+                    <i class="fa-solid fa-stopwatch"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Class 9 Aptitude Assessment Test</h2>
+                    <p class="text-slate-500 text-sm mt-1">Simulate a full exam with timed conditions and performance breakdown.</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left max-w-md mx-auto">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Select Subject</label>
+                        <select id="exam-subject-select" class="w-full bg-slate-50 border rounded-xl p-2.5 text-sm font-medium">
+                            <option value="All">All Subjects (50 Qs)</option>
+                            <option value="Mathematics">Mathematics Only (10 Qs)</option>
+                            <option value="Science">Science Only (10 Qs)</option>
+                            <option value="English">English Only (10 Qs)</option>
+                            <option value="Social Science">Social Science Only (10 Qs)</option>
+                            <option value="Logical Reasoning">Logical Reasoning Only (10 Qs)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Duration Limit</label>
+                        <select id="exam-time-select" class="w-full bg-slate-50 border rounded-xl p-2.5 text-sm font-medium">
+                            <option value="30">30 Minutes</option>
+                            <option value="45" selected>45 Minutes</option>
+                            <option value="60">60 Minutes</option>
+                            <option value="0">Untimed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl text-left text-xs text-amber-800 space-y-1">
+                    <p class="font-bold"><i class="fa-solid fa-circle-info mr-1"></i> Exam Instructions:</p>
+                    <ul class="list-disc list-inside space-y-0.5 text-amber-700">
+                        <li>Answers cannot be revealed until the final submission.</li>
+                        <li>Explanations and subject breakdown are displayed upon finishing.</li>
+                        <li>You can navigate freely back and forth between questions.</li>
+                    </ul>
+                </div>
+
+                <button onclick="startExam()" class="w-full sm:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl transition shadow-md">
+                    <i class="fa-solid fa-play mr-2"></i> Start Assessment Test
+                </button>
+            </div>
+
+            <!-- Active Exam Screen -->
+            <div id="exam-active" class="hidden space-y-6">
+                <!-- Exam Header Bar -->
+                <div class="bg-slate-900 text-white p-4 rounded-2xl shadow-md flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <span id="e-subject-title" class="bg-indigo-600 text-xs font-bold px-3 py-1 rounded-lg uppercase">Full Test</span>
+                        <span id="e-question-progress" class="text-xs font-medium text-slate-300">Question 1 of 50</span>
+                    </div>
+                    
+                    <div id="exam-timer-box" class="flex items-center gap-2 bg-slate-800 px-4 py-1.5 rounded-xl border border-slate-700">
+                        <i class="fa-solid fa-clock text-amber-400 text-sm"></i>
+                        <span id="exam-timer" class="font-mono text-base font-bold text-amber-300">45:00</span>
+                    </div>
+
+                    <button onclick="confirmSubmitExam()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg transition">
+                        <i class="fa-solid fa-paper-plane mr-1"></i> Submit Test
+                    </button>
+                </div>
+
+                <!-- Exam Question Container -->
+                <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 min-h-[400px] flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-2 mb-4">
+                            <span id="e-badge-sub" class="bg-slate-100 text-slate-700 text-xs font-bold px-2.5 py-0.5 rounded-md">Math</span>
+                            <span id="e-badge-diff" class="bg-slate-100 text-slate-700 text-xs font-bold px-2.5 py-0.5 rounded-md">Easy</span>
+                        </div>
+                        <div id="e-question-text" class="text-base sm:text-lg font-semibold text-slate-800 mb-6"></div>
+                        <div id="e-options-container" class="grid grid-cols-1 gap-3 mb-6"></div>
+                    </div>
+
+                    <!-- Bottom Nav -->
+                    <div class="flex items-center justify-between border-t pt-4">
+                        <button id="e-prev-btn" onclick="navExam(-1)" class="px-4 py-2 bg-slate-100 text-slate-700 text-sm font-semibold rounded-xl">Previous</button>
+                        <div class="flex items-center gap-1 overflow-x-auto max-w-md py-1" id="e-palette-dots"></div>
+                        <button id="e-next-btn" onclick="navExam(1)" class="px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-xl">Next</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exam Results Screen -->
+            <div id="exam-results" class="hidden bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 space-y-8">
+                <div class="text-center max-w-lg mx-auto">
+                    <div id="result-icon-badge" class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto text-3xl mb-4 border-4 border-indigo-100">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800">Test Performance Summary</h2>
+                    <p class="text-slate-500 text-sm">Class 9 Aptitude Evaluation</p>
+
+                    <div class="mt-6 flex justify-center items-center gap-6">
+                        <div class="p-4 bg-slate-50 rounded-2xl border w-32">
+                            <div id="res-score-percent" class="text-3xl font-extrabold text-indigo-600">0%</div>
+                            <div class="text-xs font-bold text-slate-400 uppercase mt-1">Accuracy</div>
+                        </div>
+                        <div class="p-4 bg-slate-50 rounded-2xl border w-32">
+                            <div id="res-score-ratio" class="text-3xl font-extrabold text-slate-800">0/50</div>
+                            <div class="text-xs font-bold text-slate-400 uppercase mt-1">Score</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Breakdown by Subject -->
+                <div class="max-w-2xl mx-auto bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                    <h3 class="font-bold text-slate-800 text-sm uppercase tracking-wider mb-4 border-b pb-2">Subject Performance Breakdown</h3>
+                    <div id="subject-breakdown-list" class="space-y-3"></div>
+                </div>
+
+                <!-- Review Questions Section -->
+                <div>
+                    <h3 class="font-bold text-slate-800 text-lg mb-4">Detailed Question Review</h3>
+                    <div id="exam-review-container" class="space-y-4"></div>
+                </div>
+
+                <div class="text-center pt-4 border-t">
+                    <button onclick="switchTab('practice')" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl transition">
+                        Back to Practice Mode
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUESTION BANK PRINTABLE / LIST TAB -->
+        <div id="tab-bank" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 flex flex-wrap items-center justify-between gap-4 no-print">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800">Complete Aptitude Test Repository</h2>
+                    <p class="text-slate-500 text-xs">Displaying all 50 verified Class 9 multiple choice questions with solutions.</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-xl hover:bg-indigo-700 transition">
+                        <i class="fa-solid fa-print mr-1.5"></i> Export Printable Worksheet
+                    </button>
+                </div>
+            </div>
+
+            <div id="bank-list-container" class="space-y-4">
+                <!-- Dynamically filled -->
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Full Question Bank Dataset (50 Questions: 10 per subject - 4 Easy, 3 Moderate, 3 Hard)
+        const MASTER_QUESTIONS = [
+            // ==================== MATHEMATICS (10) ====================
+            {
+                id: 1,
+                subject: "Mathematics",
+                difficulty: "Easy",
+                question: "If a linear equation in two variables is given by $2x + 3y = 12$, what is the $y$-intercept of its graph on the Cartesian plane?",
+                options: ["$(6, 0)$", "$(0, 4)$", "$(4, 0)$", "$(0, 6)$"],
+                correct: 1,
+                explanation: "To find the $y$-intercept, set $x = 0$. $2(0) + 3y = 12 \\Rightarrow 3y = 12 \\Rightarrow y = 4$. Thus, the coordinate is $(0, 4)$."
+            },
+            {
+                id: 2,
+                subject: "Mathematics",
+                difficulty: "Easy",
+                question: "Find the remainder when the polynomial $P(x) = x^3 - 3x^2 + 4x - 5$ is divided by $(x - 2)$ using the Remainder Theorem.",
+                options: ["$-1$", "$1$", "$-5$", "$3$"],
+                correct: 0,
+                explanation: "By Remainder Theorem, remainder $R = P(2) = (2)^3 - 3(2)^2 + 4(2) - 5 = 8 - 12 + 8 - 5 = -1$."
+            },
+            {
+                id: 3,
+                subject: "Mathematics",
+                difficulty: "Easy",
+                question: "In two parallel lines intersected by a transversal, if one interior angle on the same side of the transversal is $75^\\circ$, what is the measure of the consecutive interior angle on the same side?",
+                options: ["$75^\\circ$", "$105^\\circ$", "$115^\\circ$", "$90^\\circ$"],
+                correct: 1,
+                explanation: "Consecutive interior angles on the same side of a transversal are supplementary (sum to $180^\\circ$). So, angle = $180^\\circ - 75^\\circ = 105^\\circ$."
+            },
+            {
+                id: 4,
+                subject: "Mathematics",
+                difficulty: "Easy",
+                question: "What is the total surface area of a solid hemisphere of radius $r = 7\\text{ cm}$? (Take $\\pi = \\frac{22}{7}$)",
+                options: ["$308\\text{ cm}^2$", "$462\\text{ cm}^2$", "$616\\text{ cm}^2$", "$154\\text{ cm}^2$"],
+                correct: 1,
+                explanation: "Total Surface Area of a solid hemisphere = $3\\pi r^2 = 3 \\times \\frac{22}{7} \\times 7 \\times 7 = 3 \\times 22 \\times 7 = 462\\text{ cm}^2$."
+            },
+            {
+                id: 5,
+                subject: "Mathematics",
+                difficulty: "Moderate",
+                question: "In $\\triangle ABC$, medians $AD$, $BE$, and $CF$ intersect at centroid $G$. If $\\text{Area}(\\triangle ABC) = 54\\text{ cm}^2$, what is the area of quadrilateral $BDGF$?",
+                options: ["$9\\text{ cm}^2$", "$12\\text{ cm}^2$", "$18\\text{ cm}^2$", "$27\\text{ cm}^2$"],
+                correct: 2,
+                explanation: "Medians divide a triangle into 6 equal small triangles. $\\text{Area}(\\triangle BGD) = \\text{Area}(\\triangle BGF) = 54 / 6 = 9\\text{ cm}^2$. Area of quadrilateral $BDGF = 9 + 9 = 18\\text{ cm}^2$."
+            },
+            {
+                id: 6,
+                subject: "Mathematics",
+                difficulty: "Moderate",
+                question: "Rationalize the denominator of $\\frac{6}{\\sqrt{7} - \\sqrt{3}}$ and simplify completely.",
+                options: ["$\\frac{3(\\sqrt{7} + \\sqrt{3})}{2}$", "$3(\\sqrt{7} - \\sqrt{3})$", "$\\sqrt{7} + \\sqrt{3}$", "$\\frac{\\sqrt{7} + \\sqrt{3}}{2}$"],
+                correct: 0,
+                explanation: "Multiply numerator and denominator by $(\\sqrt{7} + \\sqrt{3})$: $\\frac{6(\\sqrt{7} + \\sqrt{3})}{7 - 3} = \\frac{6(\\sqrt{7} + \\sqrt{3})}{4} = \\frac{3(\\sqrt{7} + \\sqrt{3})}{2}$."
+            },
+            {
+                id: 7,
+                subject: "Mathematics",
+                difficulty: "Moderate",
+                question: "If point $P(-3, 5)$ is reflected across the $x$-axis to point $Q$, and $Q$ is then reflected across the $y$-axis to point $R$, what are the coordinates of $R$?",
+                options: ["$(3, -5)$", "$(-3, -5)$", "$(3, 5)$", "$(-5, 3)$"],
+                correct: 0,
+                explanation: "Reflection of $(-3, 5)$ across $x$-axis gives $Q(-3, -5)$. Reflecting $Q(-3, -5)$ across $y$-axis negates $x$-coordinate, giving $R(3, -5)$."
+            },
+            {
+                id: 8,
+                subject: "Mathematics",
+                difficulty: "Hard",
+                question: "The sides of a triangular park are in the ratio $13 : 14 : 15$ and its perimeter is $84\\text{ m}$. Find the area of the triangular park using Heron's formula.",
+                options: ["$336\\text{ m}^2$", "$168\\text{ m}^2$", "$672\\text{ m}^2$", "$252\\text{ m}^2$"],
+                correct: 0,
+                explanation: "Let sides be $13k, 14k, 15k$. $42k = 84 \\Rightarrow k = 2$. Sides are $26, 28, 30$. Semi-perimeter $s = 42$. $\\text{Area} = \\sqrt{42(42-26)(42-28)(42-30)} = \\sqrt{42 \\times 16 \\times 14 \\times 12} = 336\\text{ m}^2$."
+            },
+            {
+                id: 9,
+                subject: "Mathematics",
+                difficulty: "Hard",
+                question: "A chord of length $16\\text{ cm}$ is drawn inside a circle of radius $10\\text{ cm}$. Calculate the perpendicular distance from the center of the circle to this chord.",
+                options: ["$4\\text{ cm}$", "$6\\text{ cm}$", "$8\\text{ cm}$", "$5\\text{ cm}$"],
+                correct: 1,
+                explanation: "The perpendicular from the center bisects the chord into two $8\\text{ cm}$ segments. By Pythagorean theorem: $d = \\sqrt{10^2 - 8^2} = \\sqrt{100 - 64} = \\sqrt{36} = 6\\text{ cm}$."
+            },
+            {
+                id: 10,
+                subject: "Mathematics",
+                difficulty: "Hard",
+                question: "The mean height of a group of 10 students is $150\\text{ cm}$. Later, it was discovered that one height recorded as $140\\text{ cm}$ was misread instead of the correct value $160\\text{ cm}$. What is the correct mean height?",
+                options: ["$151\\text{ cm}$", "$152\\text{ cm}$", "$154\\text{ cm}$", "$148\\text{ cm}$"],
+                correct: 1,
+                explanation: "Initial Sum = $150 \\times 10 = 1500\\text{ cm}$. Correct Sum = $1500 - 140 + 160 = 1520\\text{ cm}$. Correct Mean = $1520 / 10 = 152\\text{ cm}$."
+            },
+
+            // ==================== SCIENCE (10) ====================
+            {
+                id: 11,
+                subject: "Science",
+                difficulty: "Easy",
+                question: "Which organelle is commonly referred to as the 'suicide bag' of a cell due to its high concentration of hydrolytic enzymes?",
+                options: ["Mitochondria", "Ribosome", "Lysosome", "Golgi Apparatus"],
+                correct: 2,
+                explanation: "Lysosomes contain powerful digestive enzymes capable of digesting cellular components when damaged."
+            },
+            {
+                id: 12,
+                subject: "Science",
+                difficulty: "Easy",
+                question: "Which Newton's Law of Motion explains why a passenger lurches forward when a fast-moving bus suddenly applies brakes?",
+                options: ["First Law (Inertia)", "Second Law ($F=ma$)", "Third Law (Action-Reaction)", "Law of Gravitation"],
+                correct: 0,
+                explanation: "Newton's First Law (Law of Inertia) states that an object continues in its state of motion unless acted upon by an external force."
+            },
+            {
+                id: 13,
+                subject: "Science",
+                difficulty: "Easy",
+                question: "Which of the following processes represents direct transition from solid state to gaseous state without passing through the liquid phase?",
+                options: ["Evaporation", "Condensation", "Sublimation", "Deposition"],
+                correct: 2,
+                explanation: "Sublimation is the direct phase change from solid to gas (e.g., Camphor, Ammonium Chloride, Dry Ice)."
+            },
+            {
+                id: 14,
+                subject: "Science",
+                difficulty: "Easy",
+                question: "Which complex permanent plant tissue is responsible for bidirectional transport of organic food molecules (sucrose) throughout the plant?",
+                options: ["Xylem", "Phloem", "Sclerenchyma", "Parenchyma"],
+                correct: 1,
+                explanation: "Phloem conducts synthesized food from leaves to all other parts of the plant bidirectionally."
+            },
+            {
+                id: 15,
+                subject: "Science",
+                difficulty: "Moderate",
+                question: "An electric appliance of power rating $1000\\text{ W}$ operates continuously for $5\\text{ hours}$ daily. How many commercial units (kWh) of energy are consumed in 30 days?",
+                options: ["$15\\text{ units}$", "$150\\text{ units}$", "$50\\text{ units}$", "$300\\text{ units}$"],
+                correct: 1,
+                explanation: "Energy = Power (kW) $\\times$ Time (h) $\\times$ Days = $1\\text{ kW} \\times 5\\text{ h/day} \\times 30\\text{ days} = 150\\text{ kWh} = 150\\text{ units}$."
+            },
+            {
+                id: 16,
+                subject: "Science",
+                difficulty: "Moderate",
+                question: "Calculate the number of moles present in $88\\text{ g}$ of Carbon Dioxide gas ($\text{CO}_2$). (Atomic masses: $\text{C} = 12\\text{ u}, \text{O} = 16\\text{ u}$)",
+                options: ["$1\\text{ mole}$", "$2\\text{ moles}$", "$3\\text{ moles}$", "$4\\text{ moles}$"],
+                correct: 1,
+                explanation: "Molar mass of $\text{CO}_2 = 12 + (2 \\times 16) = 44\\text{ g/mol}$. Moles = $\\frac{\\text{Given Mass}}{\\text{Molar Mass}} = \\frac{88}{44} = 2\\text{ moles}$."
+            },
+            {
+                id: 17,
+                subject: "Science",
+                difficulty: "Moderate",
+                question: "A metallic block weighs $50\\text{ N}$ in air and $42\\text{ N}$ when completely immersed in water. What is the buoyant force exerted by water on the block?",
+                options: ["$92\\text{ N}$", "$8\\text{ N}$", "$42\\text{ N}$", "$50\\text{ N}$"],
+                correct: 1,
+                explanation: "By Archimedes' Principle, Buoyant Force = Weight in Air - Apparent Weight in Liquid = $50\\text{ N} - 42\\text{ N} = 8\\text{ N}$."
+            },
+            {
+                id: 18,
+                subject: "Science",
+                difficulty: "Hard",
+                question: "A ball of mass $m$ is dropped from height $h$ above the ground. Neglecting air friction, at what height above the ground will its kinetic energy equal twice its potential energy?",
+                options: ["$\\frac{h}{2}$", "$\\frac{h}{3}$", "$\\frac{2h}{3}$", "$\\frac{h}{4}$"],
+                correct: 1,
+                explanation: "Total mechanical energy $E = mgh$. Let target height be $x$. $PE = mgx$ and $KE = 2PE = 2mgx$. Total $E = PE + KE \\Rightarrow mgh = 3mgx \\Rightarrow x = \\frac{h}{3}$."
+            },
+            {
+                id: 19,
+                subject: "Science",
+                difficulty: "Hard",
+                question: "A sound wave travels with a speed of $340\\text{ m/s}$ in air. If its wavelength is $1.7\\text{ cm}$, calculate the frequency of this sound wave.",
+                options: ["$200\\text{ Hz}$", "$2000\\text{ Hz}$", "$20000\\text{ Hz}$", "$20\\text{ Hz}$"],
+                correct: 2,
+                explanation: "Convert wavelength $\\lambda = 1.7\\text{ cm} = 0.017\\text{ m}$. Speed $v = f \\times \\lambda \\Rightarrow f = \\frac{v}{\\lambda} = \\frac{340}{0.017} = 20000\\text{ Hz}$."
+            },
+            {
+                id: 20,
+                subject: "Science",
+                difficulty: "Hard",
+                question: "What is the correct chemical formula for Aluminium Sulphate, given the valency of Aluminium is $+3$ and Sulphate ion is $\text{SO}_4^{2-}$?",
+                options: ["$\\text{AlSO}_4$", "$\\text{Al}_2\\text{SO}_4$", "$\\text{Al}_2(\\text{SO}_4)_3$", "$\\text{Al}_3(\\text{SO}_4)_2$"],
+                correct: 2,
+                explanation: "Crossing valencies: Aluminium ion $\\text{Al}^{3+}$ and Sulphate ion $\\text{SO}_4^{2-}$ yields $\\text{Al}_2(\\text{SO}_4)_3$."
+            },
+
+            // ==================== ENGLISH (10) ====================
+            {
+                id: 21,
+                subject: "English",
+                difficulty: "Easy",
+                question: "Identify the option that correctly converts the following active voice sentence into passive voice: 'The team completed the project before the deadline.'",
+                options: [
+                    "The project is completed by the team before the deadline.",
+                    "The project had been completed by the team before the deadline.",
+                    "The project was completed by the team before the deadline.",
+                    "The project has been completed by the team before the deadline."
+                ],
+                correct: 2,
+                explanation: "The original sentence is in simple past tense ('completed'). Passive form requires simple past auxiliary 'was/were' + past participle."
+            },
+            {
+                id: 22,
+                subject: "English",
+                difficulty: "Easy",
+                question: "Select the grammatically correct sentence adhering strictly to Subject-Verb Agreement rules:",
+                options: [
+                    "Neither the manager nor the employees was aware of the change.",
+                    "Neither the manager nor the employees were aware of the change.",
+                    "Neither the manager nor the employees is aware of the change.",
+                    "Neither the manager nor the employees has been aware of the change."
+                ],
+                correct: 1,
+                explanation: "When subjects are joined by 'neither... nor', the verb agrees in number with the closer subject ('employees' -> plural 'were')."
+            },
+            {
+                id: 23,
+                subject: "English",
+                difficulty: "Easy",
+                question: "Choose the word that is most nearly SYNONYMOUS in meaning to 'CANDID':",
+                options: ["Deceptive", "Frank", "Reserved", "Ambiguous"],
+                correct: 1,
+                explanation: "'Candid' means truthful, straightforward, and frank."
+            },
+            {
+                id: 24,
+                subject: "English",
+                difficulty: "Easy",
+                question: "Convert to reported speech: He said, 'I am reading a fascinating book.'",
+                options: [
+                    "He said that he is reading a fascinating book.",
+                    "He said that he was reading a fascinating book.",
+                    "He told that he had read a fascinating book.",
+                    "He said that I was reading a fascinating book."
+                ],
+                correct: 1,
+                explanation: "In reported speech with past reporting verb ('said'), present continuous ('am reading') changes to past continuous ('was reading')."
+            },
+            {
+                id: 25,
+                subject: "English",
+                difficulty: "Moderate",
+                question: "Choose the word that best completes the sentence: 'Despite facing numerous obstacles during the expedition, the mountain climber remained _______ in her pursuit of reaching the summit.'",
+                options: ["resolute", "vacillating", "indolent", "equivocal"],
+                correct: 0,
+                explanation: "'Resolute' means admirably purposeful, determined, and unwavering, matching the context of overcoming obstacles."
+            },
+            {
+                id: 26,
+                subject: "English",
+                difficulty: "Moderate",
+                question: "Identify the correct tense structure in the sentence: 'By next month, she _______ for this organization for ten years.'",
+                options: [
+                    "will work",
+                    "will have been working",
+                    "has been working",
+                    "would be working"
+                ],
+                correct: 1,
+                explanation: "Future Perfect Continuous Tense ('will have been working') indicates an ongoing action that will continue up to a specified point in the future."
+            },
+            {
+                id: 27,
+                subject: "English",
+                difficulty: "Moderate",
+                question: "Select the modal verb that best expresses strong logical deduction in the past: 'The streets are soaking wet; it _______ heavily last night.'",
+                options: ["must have rained", "should have rained", "could rain", "might rain"],
+                correct: 0,
+                explanation: "'Must have + past participle' expresses a strong certainty/logical conclusion about a past event based on present evidence."
+            },
+            {
+                id: 28,
+                subject: "English",
+                difficulty: "Hard",
+                question: "Identify the part of the sentence containing a grammatical error: '(A) One of the main reasons / (B) for his unexpected failure / (C) are his lack of discipline. / (D) No error'",
+                options: ["Part A", "Part B", "Part C", "Part D"],
+                correct: 2,
+                explanation: "The true singular subject is 'One' (One of the reasons...), so the verb must be singular 'is' instead of 'are'."
+            },
+            {
+                id: 29,
+                subject: "English",
+                difficulty: "Hard",
+                question: "Identify the underlined clause in the sentence: 'The scientist <u>who discovered the new compound</u> was awarded the Nobel Prize.'",
+                options: ["Adverb Clause", "Noun Clause", "Relative / Adjective Clause", "Prepositional Phrase"],
+                correct: 2,
+                explanation: "The clause 'who discovered the new compound' modifies the noun 'scientist', functioning as a Relative (Adjective) Clause."
+            },
+            {
+                id: 30,
+                subject: "English",
+                difficulty: "Hard",
+                question: "Choose the option that best completes the verbal analogy: EPHEMERAL : PERMANENT :: _______ : _______",
+                options: [
+                    "Transient : Fleeting",
+                    "Fastidious : Fussy",
+                    "Lethargic : Energetic",
+                    "Taciturn : Mute"
+                ],
+                correct: 2,
+                explanation: "'Ephemeral' and 'Permanent' are antonyms. Similarly, 'Lethargic' (sluggish) and 'Energetic' are direct antonyms."
+            },
+
+            // ==================== SOCIAL SCIENCE (10) ====================
+            {
+                id: 31,
+                subject: "Social Science",
+                difficulty: "Easy",
+                question: "Which atmospheric layer contains the ozone layer that protects Earth from harmful ultraviolet radiation?",
+                options: ["Troposphere", "Stratosphere", "Mesosphere", "Thermosphere"],
+                correct: 1,
+                explanation: "The ozone layer is situated in the Stratosphere layer of the atmosphere."
+            },
+            {
+                id: 32,
+                subject: "Social Science",
+                difficulty: "Easy",
+                question: "In 18th-century French society before the 1789 Revolution, which Estate paid almost all the taxes?",
+                options: ["First Estate (Clergy)", "Second Estate (Nobility)", "Third Estate (Peasants, Bourgeoisie)", "Royal Court"],
+                correct: 2,
+                explanation: "The Third Estate, comprising peasants, artisans, and middle-class professionals, bore the total tax burden."
+            },
+            {
+                id: 33,
+                subject: "Social Science",
+                difficulty: "Easy",
+                question: "What is the defining feature of a democratic form of government?",
+                options: ["Rulers chosen by hereditary succession", "Rulers elected by citizens in free and fair elections", "Rule by military commanders", "Rule by a single dictator"],
+                correct: 1,
+                explanation: "Democracy is a system of government where rulers are elected by the people through free and fair elections."
+            },
+            {
+                id: 34,
+                subject: "Social Science",
+                difficulty: "Easy",
+                question: "What primary economic function differentiates a 'fixed capital' asset from a 'working capital' asset in production?",
+                options: [
+                    "Fixed capital is used to purchase raw materials, whereas working capital includes machinery.",
+                    "Fixed capital is reused over many years, whereas working capital is consumed in production.",
+                    "Fixed capital applies only to agriculture, while working capital applies to tech.",
+                    "Fixed capital consists of cash in hand."
+                ],
+                correct: 1,
+                explanation: "Tools, machinery, and buildings remain intact across years (fixed capital), whereas cash and raw materials are consumed during production (working capital)."
+            },
+            {
+                id: 35,
+                subject: "Social Science",
+                difficulty: "Moderate",
+                question: "Which Fundamental Right under Article 32 of the Indian Constitution was described by Dr. B.R. Ambedkar as the 'Heart and Soul' of the Constitution?",
+                options: [
+                    "Right to Equality",
+                    "Right to Freedom of Religion",
+                    "Right to Constitutional Remedies",
+                    "Right against Exploitation"
+                ],
+                correct: 2,
+                explanation: "Article 32 (Right to Constitutional Remedies) allows citizens to move the Supreme Court to enforce Fundamental Rights."
+            },
+            {
+                id: 36,
+                subject: "Social Science",
+                difficulty: "Moderate",
+                question: "Which prominent mountain pass connects the Kashmir Valley with Kargil and Leh in the Himalayan region?",
+                options: ["Nathu La", "Zoji La", "Shipki La", "Boran Pass"],
+                correct: 1,
+                explanation: "Zoji La pass is located on National Highway 1 connecting Srinagar/Kashmir Valley to Kargil and Leh."
+            },
+            {
+                id: 37,
+                subject: "Social Science",
+                difficulty: "Moderate",
+                question: "What major event occurred on 27 February 1933 in Germany, allowing Hitler to suspend fundamental rights like freedom of speech and press?",
+                options: ["Reichstag Fire Incident", "Signing of Versailles Treaty", "Night of Long Knives", "Munich Putsch"],
+                correct: 0,
+                explanation: "The mysterious Reichstag Fire enabled Hitler to issue the Fire Decree suspending civil rights."
+            },
+            {
+                id: 38,
+                subject: "Social Science",
+                difficulty: "Hard",
+                question: "While the Green Revolution significantly increased wheat and rice yields, what was a major negative ecological consequence?",
+                options: [
+                    "Depletion of groundwater tables due to excessive tube-well irrigation",
+                    "Permanent reduction in crop biodiversity across all pulses",
+                    "Immediate desertification of river deltas",
+                    "Total loss of soil micro-nutrients in high altitude zones"
+                ],
+                correct: 0,
+                explanation: "Over-reliance on chemical fertilizers and intensive groundwater tube-well irrigation led to severe water table depletion and land degradation."
+            },
+            {
+                id: 39,
+                subject: "Social Science",
+                difficulty: "Hard",
+                question: "Which high-altitude fast-flowing westerly wind stream in the upper atmosphere significantly influences the onset and retreat of the Indian Monsoons?",
+                options: ["Trade Winds", "Jet Streams", "Loo", "Doldrums"],
+                correct: 1,
+                explanation: "Subtropical Westerly Jet Streams blowing south of the Himalayas play a vital role in Indian monsoon atmospheric dynamics."
+            },
+            {
+                id: 40,
+                subject: "Social Science",
+                difficulty: "Hard",
+                question: "By which Constitutional Amendment Act were the words 'SOCIALIST', 'SECULAR', and 'INTEGRITY' inserted into the Preamble of the Indian Constitution?",
+                options: ["44th Amendment Act (1978)", "42nd Amendment Act (1976)", "86th Amendment Act (2002)", "1st Amendment Act (1951)"],
+                correct: 1,
+                explanation: "The 42nd Constitutional Amendment Act of 1976 added 'Socialist', 'Secular', and 'Integrity' to the Preamble."
+            },
+
+            // ==================== LOGICAL REASONING (10) ====================
+            {
+                id: 41,
+                subject: "Logical Reasoning",
+                difficulty: "Easy",
+                question: "Complete the number series: $3, 7, 15, 31, 63, \\dots$",
+                options: ["$95$", "$127$", "$124$", "$128$"],
+                correct: 1,
+                explanation: "Rule: $(n \\times 2) + 1$. $3 \\times 2 + 1 = 7$; $7 \\times 2 + 1 = 15$; ... $63 \\times 2 + 1 = 127$."
+            },
+            {
+                id: 42,
+                subject: "Logical Reasoning",
+                difficulty: "Easy",
+                question: "If 'LIGHT' is coded as 'MJHIU' in a simple substitution cipher, how is 'FRAME' coded under the same rule?",
+                options: ["GSBNF", "EQZLD", "GSDNF", "GSBNFE"],
+                correct: 0,
+                explanation: "Each letter is shifted forward by $+1$ in the alphabet: F(+1)->G, R(+1)->S, A(+1)->B, M(+1)->N, E(+1)->F. Result: GSBNF."
+            },
+            {
+                id: 43,
+                subject: "Logical Reasoning",
+                difficulty: "Easy",
+                question: "Pointing to a photograph, a boy said, 'He is the only son of my grandfather's only son.' How is the person in the photograph related to the boy?",
+                options: ["Uncle", "Brother", "Father", "Self / Himself"],
+                correct: 3,
+                explanation: "Boy's grandfather's only son = Boy's Father. The only son of the Boy's Father = The Boy himself!"
+            },
+            {
+                id: 44,
+                subject: "Logical Reasoning",
+                difficulty: "Easy",
+                question: "A man starts walking North, turns right, walks 5 km, turns right again and walks 5 km. In which direction is he relative to his starting position?",
+                options: ["North-East", "East", "South-East", "South"],
+                correct: 1,
+                explanation: "If he walks North $x$ distance, turns Right (East) $5\\text{ km}$, then turns Right (South) $x$ distance, he aligns directly East of starting point."
+            },
+            {
+                id: 45,
+                subject: "Logical Reasoning",
+                difficulty: "Moderate",
+                question: "Five students A, B, C, D, and E are sitting in a row facing North. C is sitting in the exact middle. A is to the immediate left of B, and E is to the immediate right of C. D is at the left extreme. Who is sitting at the right extreme?",
+                options: ["A", "B", "C", "D"],
+                correct: 1,
+                explanation: "5 seats: _ _ C _ _. D is at left extreme (Pos 1): D _ C _ _. E is right of C (Pos 4): D _ C E _. A is left of B, so Pos 2=A, Pos 5=B. Order: D - A - C - E - B. Right extreme = B."
+            },
+            {
+                id: 46,
+                subject: "Logical Reasoning",
+                difficulty: "Moderate",
+                question: "Statements: (1) All cats are mammals. (2) All mammals are animals. Conclusion I: All cats are animals. Conclusion II: Some animals are cats.",
+                options: ["Only Conclusion I follows", "Only Conclusion II follows", "Neither follows", "Both Conclusion I and II follow"],
+                correct: 3,
+                explanation: "Since Cats $\\subset$ Mammals $\\subset$ Animals, all Cats are Animals (I follows) and Some Animals are Cats (II follows)."
+            },
+            {
+                id: 47,
+                subject: "Logical Reasoning",
+                difficulty: "Moderate",
+                question: "If 'A + B' means A is the father of B; 'A - B' means A is the sister of B; 'A * B' means A is the brother of B. Which expression proves that P is the aunt of Q?",
+                options: ["P - R + Q", "P + R - Q", "P * R + Q", "P - R * Q"],
+                correct: 0,
+                explanation: "In 'P - R + Q': P is sister of R. R is father of Q. Sister of father = Aunt. Therefore, P is aunt of Q."
+            },
+            {
+                id: 48,
+                subject: "Logical Reasoning",
+                difficulty: "Hard",
+                question: "In a certain code language, if 'PLANET' is coded as 'QNDRJX', how is 'FLOWER' coded under the exact same transformation rule?",
+                options: ["GMRAKD", "GLPBDS", "GMRBKD", "HMQAKD"],
+                correct: 0,
+                explanation: "Letter position shifts follow $+1, +2, +3, +4, +5, +6$.\nF(+1)->G, L(+2)->N, O(+3)->R, W(+4)->A, E(+5)->K, R(+6)->D. Result: GMRAKD."
+            },
+            {
+                id: 49,
+                subject: "Logical Reasoning",
+                difficulty: "Hard",
+                question: "Rohan walks 10 m North, turns left and walks 20 m, turns left again and walks 10 m, then turns right and walks 15 m. What is his shortest distance and direction from his starting point?",
+                options: ["35 m West", "25 m West", "35 m East", "20 m North-West"],
+                correct: 0,
+                explanation: "North 10m then South 10m cancels vertical distance. Left 20m West + Right 15m West = Total 35m West."
+            },
+            {
+                id: 50,
+                subject: "Logical Reasoning",
+                difficulty: "Hard",
+                question: "In a class of 60 students, 30 play Cricket, 25 play Football, and 10 play both sports. How many students play neither Cricket nor Football?",
+                options: ["10", "15", "20", "5"],
+                correct: 1,
+                explanation: "Total playing at least one = $n(C) + n(F) - n(C \\cap F) = 30 + 25 - 10 = 45$. Neither = $60 - 45 = 15$."
+            }
+        ];
+
+        // Application State Variables
+        let currentTab = 'practice';
+        let filteredPracticeData = [...MASTER_QUESTIONS];
+        let practiceIndex = 0;
+        let practiceAnswers = {}; // { qId: { index, submitted } }
+
+        // Exam State
+        let examQuestions = [];
+        let examIndex = 0;
+        let examAnswers = {}; // { qId: optionIndex }
+        let examTimerInterval = null;
+        let examTimeLeft = 0;
+
+        // Subjects list
+        const SUBJECTS = ["Mathematics", "Science", "English", "Social Science", "Logical Reasoning"];
+
+        // Init on DOM Load
+        window.addEventListener('DOMContentLoaded', () => {
+            renderSubjectTabs();
+            filterPractice();
+            renderQuestionBank();
+        });
+
+        function switchTab(tab) {
+            currentTab = tab;
+            ['practice', 'exam', 'bank'].forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                const nav = document.getElementById(`nav-${t}`);
+                if (t === tab) {
+                    el.classList.remove('hidden');
+                    if (nav) {
+                        nav.className = "px-4 py-2 rounded-lg text-sm font-medium transition text-white bg-indigo-800 shadow-inner";
+                    }
+                } else {
+                    el.classList.add('hidden');
+                    if (nav) {
+                        nav.className = "px-4 py-2 rounded-lg text-sm font-medium transition text-indigo-200 hover:text-white hover:bg-indigo-800";
+                    }
+                }
+            });
+
+            if (tab === 'practice') renderPracticeQuestion();
+        }
+
+        // ==================== PRACTICE MODE ENGINE ====================
+        function renderSubjectTabs() {
+            const container = document.getElementById('subject-tabs-container');
+            let html = `<button onclick="setSubjectFilter('All')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap bg-indigo-600 text-white shadow-sm">All Subjects</button>`;
+            SUBJECTS.forEach(s => {
+                html += `<button onclick="setSubjectFilter('${s}')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap bg-white text-slate-600 border border-slate-200 hover:border-indigo-400 hover:text-indigo-600 transition">${s}</button>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function setSubjectFilter(sub) {
+            document.getElementById('practice-subject').value = sub;
+            filterPractice();
+        }
+
+        function filterPractice() {
+            const sub = document.getElementById('practice-subject').value;
+            const diff = document.getElementById('practice-difficulty').value;
+            const search = document.getElementById('practice-search').value.toLowerCase();
+
+            filteredPracticeData = MASTER_QUESTIONS.filter(q => {
+                const mSub = sub === "All" || q.subject === sub;
+                const mDiff = diff === "All" || q.difficulty === diff;
+                const mSearch = search === "" || q.question.toLowerCase().includes(search) || q.subject.toLowerCase().includes(search);
+                return mSub && mDiff && mSearch;
+            });
+
+            practiceIndex = 0;
+            document.getElementById('practice-total-badge').innerText = filteredPracticeData.length;
+
+            if (filteredPracticeData.length === 0) {
+                renderEmptyPractice();
+            } else {
+                renderPracticeQuestion();
+            }
+        }
+
+        function renderEmptyPractice() {
+            const container = document.getElementById('practice-card-container');
+            container.innerHTML = `
+                <div class="text-center py-16">
+                    <i class="fa-solid fa-folder-open text-4xl text-slate-300 mb-3"></i>
+                    <p class="text-slate-500 font-medium text-sm">No questions match your filter criteria.</p>
+                </div>
+            `;
+        }
+
+        function renderPracticeQuestion() {
+            if (filteredPracticeData.length === 0) return;
+
+            const q = filteredPracticeData[practiceIndex];
+            const ansState = practiceAnswers[q.id] || { index: null, submitted: false };
+
+            // Badges
+            document.getElementById('p-subject-badge').innerText = q.subject;
+            
+            const diffBadge = document.getElementById('p-difficulty-badge');
+            diffBadge.innerText = q.difficulty;
+            if (q.difficulty === 'Easy') diffBadge.className = 'bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider';
+            else if (q.difficulty === 'Moderate') diffBadge.className = 'bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider';
+            else diffBadge.className = 'bg-rose-100 text-rose-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider';
+
+            document.getElementById('p-question-counter').innerText = `Question ${practiceIndex + 1} of ${filteredPracticeData.length}`;
+            document.getElementById('p-question-text').innerHTML = q.question;
+
+            // Options
+            const optContainer = document.getElementById('p-options-container');
+            optContainer.innerHTML = '';
+
+            q.options.forEach((optText, i) => {
+                const btn = document.createElement('button');
+                let cardStyle = 'bg-white text-slate-700 border-slate-200';
+
+                if (ansState.submitted) {
+                    btn.classList.add('disabled');
+                    if (i === q.correct) cardStyle = 'correct-option font-semibold';
+                    else if (ansState.index === i) cardStyle = 'incorrect-option font-semibold';
+                } else if (ansState.index === i) {
+                    cardStyle = 'selected-option font-semibold text-indigo-900';
+                }
+
+                btn.className = `option-card w-full text-left p-4 rounded-xl border text-sm flex items-center justify-between ${cardStyle}`;
+                btn.onclick = () => selectPracticeOption(i);
+
+                btn.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="w-6 h-6 rounded-lg bg-slate-100 text-slate-500 font-bold text-xs flex items-center justify-center border">${String.fromCharCode(65 + i)}</span>
+                        <span>${optText}</span>
+                    </div>
+                    ${ansState.submitted && i === q.correct ? '<i class="fa-solid fa-circle-check text-emerald-600"></i>' : ''}
+                    ${ansState.submitted && ansState.index === i && i !== q.correct ? '<i class="fa-solid fa-circle-xmark text-rose-600"></i>' : ''}
+                `;
+                optContainer.appendChild(btn);
+            });
+
+            // Explanation box
+            const expBox = document.getElementById('p-explanation-box');
+            if (ansState.submitted) {
+                expBox.classList.remove('hidden');
+                const isCorrect = ansState.index === q.correct;
+                expBox.className = `rounded-xl p-4 border text-sm leading-relaxed mb-6 ${isCorrect ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-200 text-rose-900'}`;
+                document.getElementById('p-explanation-title').innerHTML = isCorrect ? '<i class="fa-solid fa-circle-check text-emerald-600"></i> Correct Answer!' : '<i class="fa-solid fa-circle-xmark text-rose-600"></i> Incorrect';
+                document.getElementById('p-explanation-text').innerHTML = q.explanation;
+            } else {
+                expBox.classList.add('hidden');
+            }
+
+            // Buttons state
+            document.getElementById('p-prev-btn').disabled = practiceIndex === 0;
+            document.getElementById('p-next-btn').disabled = practiceIndex === filteredPracticeData.length - 1;
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function selectPracticeOption(idx) {
+            const q = filteredPracticeData[practiceIndex];
+            if (practiceAnswers[q.id]?.submitted) return;
+
+            practiceAnswers[q.id] = { index: idx, submitted: false };
+            renderPracticeQuestion();
+        }
+
+        function checkPracticeAnswer() {
+            const q = filteredPracticeData[practiceIndex];
+            const state = practiceAnswers[q.id];
+            if (!state || state.index === null) {
+                alert("Please select an option first!");
+                return;
+            }
+            state.submitted = true;
+            renderPracticeQuestion();
+        }
+
+        function navPractice(step) {
+            if (practiceIndex + step >= 0 && practiceIndex + step < filteredPracticeData.length) {
+                practiceIndex += step;
+                renderPracticeQuestion();
+            }
+        }
+
+        // ==================== TIMED EXAM ENGINE ====================
+        function startExam() {
+            const sub = document.getElementById('exam-subject-select').value;
+            const timeLimit = parseInt(document.getElementById('exam-time-select').value);
+
+            examQuestions = MASTER_QUESTIONS.filter(q => sub === "All" || q.subject === sub);
+            examIndex = 0;
+            examAnswers = {};
+
+            document.getElementById('exam-setup').classList.add('hidden');
+            document.getElementById('exam-active').classList.remove('hidden');
+            document.getElementById('exam-results').classList.add('hidden');
+
+            document.getElementById('e-subject-title').innerText = sub === "All" ? "Full Aptitude Exam" : sub;
+
+            // Timer Setup
+            if (timeLimit > 0) {
+                examTimeLeft = timeLimit * 60;
+                document.getElementById('exam-timer-box').classList.remove('hidden');
+                updateTimerDisplay();
+                clearInterval(examTimerInterval);
+                examTimerInterval = setInterval(() => {
+                    examTimeLeft--;
+                    updateTimerDisplay();
+                    if (examTimeLeft <= 0) {
+                        clearInterval(examTimerInterval);
+                        finishExam();
+                    }
+                }, 1000);
+            } else {
+                document.getElementById('exam-timer-box').classList.add('hidden');
+            }
+
+            renderExamQuestion();
+        }
+
+        function updateTimerDisplay() {
+            const m = Math.floor(examTimeLeft / 60);
+            const s = examTimeLeft % 60;
+            document.getElementById('exam-timer').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function renderExamQuestion() {
+            const q = examQuestions[examIndex];
+            document.getElementById('e-question-progress').innerText = `Question ${examIndex + 1} of ${examQuestions.length}`;
+            document.getElementById('e-badge-sub').innerText = q.subject;
+            document.getElementById('e-badge-diff').innerText = q.difficulty;
+            document.getElementById('e-question-text').innerHTML = q.question;
+
+            const optContainer = document.getElementById('e-options-container');
+            optContainer.innerHTML = '';
+
+            const selectedOption = examAnswers[q.id];
+
+            q.options.forEach((optText, i) => {
+                const btn = document.createElement('button');
+                const isSel = selectedOption === i;
+                btn.className = `option-card w-full text-left p-4 rounded-xl border text-sm flex items-center gap-3 ${isSel ? 'selected-option font-semibold text-indigo-900' : 'bg-white text-slate-700 border-slate-200'}`;
+                btn.onclick = () => {
+                    examAnswers[q.id] = i;
+                    renderExamQuestion();
+                };
+                btn.innerHTML = `<span class="w-6 h-6 rounded-lg bg-slate-100 text-slate-500 font-bold text-xs flex items-center justify-center border">${String.fromCharCode(65 + i)}</span> <span>${optText}</span>`;
+                optContainer.appendChild(btn);
+            });
+
+            // Navigation Dots
+            const dotsContainer = document.getElementById('e-palette-dots');
+            dotsContainer.innerHTML = '';
+            examQuestions.forEach((item, idx) => {
+                const dot = document.createElement('button');
+                const isAns = examAnswers[item.id] !== undefined;
+                const isCurr = idx === examIndex;
+                dot.className = `w-7 h-7 rounded-lg text-xs font-bold transition flex items-center justify-center ${isCurr ? 'bg-indigo-600 text-white ring-2 ring-indigo-300' : isAns ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-400'}`;
+                dot.innerText = idx + 1;
+                dot.onclick = () => {
+                    examIndex = idx;
+                    renderExamQuestion();
+                };
+                dotsContainer.appendChild(dot);
+            });
+
+            document.getElementById('e-prev-btn').disabled = examIndex === 0;
+            document.getElementById('e-next-btn').disabled = examIndex === examQuestions.length - 1;
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function navExam(step) {
+            if (examIndex + step >= 0 && examIndex + step < examQuestions.length) {
+                examIndex += step;
+                renderExamQuestion();
+            }
+        }
+
+        function confirmSubmitExam() {
+            if (confirm("Are you sure you want to finish and submit your assessment test?")) {
+                finishExam();
+            }
+        }
+
+        function finishExam() {
+            clearInterval(examTimerInterval);
+            document.getElementById('exam-active').classList.add('hidden');
+            document.getElementById('exam-results').classList.remove('hidden');
+
+            let correctCount = 0;
+            const subStats = {};
+
+            examQuestions.forEach(q => {
+                if (!subStats[q.subject]) subStats[q.subject] = { correct: 0, total: 0 };
+                subStats[q.subject].total++;
+
+                if (examAnswers[q.id] === q.correct) {
+                    correctCount++;
+                    subStats[q.subject].correct++;
+                }
+            });
+
+            const percent = Math.round((correctCount / examQuestions.length) * 100);
+            document.getElementById('res-score-percent').innerText = `${percent}%`;
+            document.getElementById('res-score-ratio').innerText = `${correctCount}/${examQuestions.length}`;
+
+            // Render breakdown
+            const bdList = document.getElementById('subject-breakdown-list');
+            bdList.innerHTML = '';
+            Object.keys(subStats).forEach(s => {
+                const st = subStats[s];
+                const pct = Math.round((st.correct / st.total) * 100);
+                bdList.innerHTML += `
+                    <div>
+                        <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
+                            <span>${s}</span>
+                            <span>${st.correct} / ${st.total} (${pct}%)</span>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-2">
+                            <div class="bg-indigo-600 h-2 rounded-full" style="width: ${pct}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Render Review
+            const revContainer = document.getElementById('exam-review-container');
+            revContainer.innerHTML = '';
+            examQuestions.forEach((q, idx) => {
+                const uAns = examAnswers[q.id];
+                const isCorr = uAns === q.correct;
+                revContainer.innerHTML += `
+                    <div class="p-4 rounded-xl border ${isCorr ? 'bg-emerald-50/50 border-emerald-200' : 'bg-rose-50/50 border-rose-200'} space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold ${isCorr ? 'text-emerald-700' : 'text-rose-700'}">Q${idx + 1}. ${q.subject} (${q.difficulty})</span>
+                            <span class="text-xs font-bold uppercase ${isCorr ? 'text-emerald-600' : 'text-rose-600'}">${isCorr ? 'Correct' : 'Incorrect'}</span>
+                        </div>
+                        <p class="text-sm font-medium text-slate-800">${q.question}</p>
+                        <div class="text-xs space-y-1 text-slate-600">
+                            <div>Your Answer: <strong>${uAns !== undefined ? q.options[uAns] : 'Not Attempted'}</strong></div>
+                            <div>Correct Answer: <strong class="text-emerald-700">${q.options[q.correct]}</strong></div>
+                        </div>
+                        <p class="text-xs text-slate-500 bg-white p-2 rounded-lg border mt-2"><strong>Explanation:</strong> ${q.explanation}</p>
+                    </div>
+                `;
+            });
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // ==================== QUESTION BANK VIEW ====================
+        function renderQuestionBank() {
+            const container = document.getElementById('bank-list-container');
+            container.innerHTML = '';
+
+            MASTER_QUESTIONS.forEach((q, idx) => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-5 rounded-xl border border-slate-200 space-y-3 card-print";
+                card.innerHTML = `
+                    <div class="flex items-center justify-between border-b pb-2">
+                        <span class="text-xs font-bold text-indigo-600 uppercase">Q${idx + 1}. ${q.subject}</span>
+                        <span class="text-xs px-2 py-0.5 rounded-md font-semibold ${q.difficulty === 'Easy' ? 'bg-emerald-100 text-emerald-800' : q.difficulty === 'Moderate' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'}">${q.difficulty}</span>
+                    </div>
+                    <p class="text-sm font-semibold text-slate-800">${q.question}</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        ${q.options.map((opt, oIdx) => `
+                            <div class="p-2 rounded-lg border ${oIdx === q.correct ? 'bg-emerald-50 border-emerald-300 font-bold text-emerald-900' : 'bg-slate-50 border-slate-200 text-slate-700'}">
+                                ${String.fromCharCode(65 + oIdx)}. ${opt}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-lg text-xs text-slate-600 border border-slate-200">
+                        <strong>Solution:</strong> ${q.explanation}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // Export as JSON file
+        function exportJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(MASTER_QUESTIONS, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "Class_9_Aptitude_Test_Bank.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+    </script>
+</body>
+</html>

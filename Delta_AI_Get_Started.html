@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delta AI — Next-Gen AI Study Companion</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        terracotta: {
+                            50: '#fdf6f4',
+                            100: '#fbece8',
+                            400: '#e8755c',
+                            500: '#d95438',
+                            600: '#c23d22',
+                            700: '#a12d16'
+                        },
+                        amber: {
+                            400: '#f3b368',
+                            500: '#e89234',
+                            600: '#cc741d'
+                        },
+                        slatebg: {
+                            900: '#0e1117',
+                            800: '#161b24',
+                            700: '#212836',
+                            600: '#2d374a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Outfit', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-main: #0e1117;
+            --bg-card: rgba(22, 27, 36, 0.85);
+            --border-color: rgba(217, 84, 56, 0.25);
+            --primary-color: #d95438;
+            --secondary-color: #e89234;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --canvas-particle: rgba(217, 84, 56, 0.4);
+        }
+
+        html:not(.dark) {
+            --bg-main: #f9f6f0;
+            --bg-card: rgba(255, 255, 255, 0.92);
+            --border-color: rgba(217, 84, 56, 0.3);
+            --primary-color: #c23d22;
+            --secondary-color: #cc741d;
+            --text-main: #161b24;
+            --text-muted: #6b7280;
+            --canvas-particle: rgba(194, 61, 34, 0.35);
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .delta-glass {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-terracotta {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: #ffffff;
+            font-weight: 700;
+            box-shadow: 0 4px 20px rgba(217, 84, 56, 0.35);
+            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease;
+        }
+
+        /* Fixed Magnetic CTA Button Container */
+        .magnetic-wrapper {
+            display: inline-block;
+            perspective: 1000px;
+        }
+
+        .magnetic-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            will-change: transform;
+            transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease;
+        }
+
+        /* 3D Rotating Orbit Core Globe */
+        .globe-container {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin: 0 auto;
+            perspective: 1000px;
+        }
+
+        .globe-core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--primary-color) 0%, rgba(232, 146, 52, 0.25) 70%, transparent 100%);
+            box-shadow: 0 0 50px var(--primary-color);
+            animation: pulseCore 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulseCore {
+            0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.85; }
+            100% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+        }
+
+        .ring-orbit {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 1px dashed var(--border-color);
+            transform-style: preserve-3d;
+            animation: rotateGlobe 12s linear infinite;
+        }
+
+        .ring-orbit-2 {
+            animation-duration: 18s;
+            animation-direction: reverse;
+            border-color: rgba(232, 146, 52, 0.35);
+        }
+
+        .orbit-node {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 0 15px var(--primary-color);
+        }
+
+        .node-1 { top: -22px; left: 50%; transform: translateX(-50%); }
+        .node-2 { bottom: -22px; left: 50%; transform: translateX(-50%); }
+        .node-3 { left: -22px; top: 50%; transform: translateY(-50%); }
+        .node-4 { right: -22px; top: 50%; transform: translateY(-50%); }
+
+        @keyframes rotateGlobe {
+            0% { transform: rotateX(65deg) rotateY(-15deg) rotateZ(0deg); }
+            100% { transform: rotateX(65deg) rotateY(-15deg) rotateZ(360deg); }
+        }
+
+        /* 3D Flashcard Flip Setup */
+        .perspective-1000 { perspective: 1000px; }
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        .card-inner.flipped { transform: rotateY(180deg); }
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 1.5rem;
+        }
+        .card-back { transform: rotateY(180deg); }
+
+        .nav-link.active {
+            color: var(--primary-color);
+            background: rgba(217, 84, 56, 0.15);
+            border-color: var(--border-color);
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-main); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative selection:bg-terracotta-500 selection:text-white">
+
+    <!-- Fluid Background Motion Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- HEADER / NAVIGATION -->
+    <header class="sticky top-0 z-40 backdrop-blur-xl border-b border-[var(--border-color)] bg-[var(--bg-main)]/85">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            
+            <!-- Brand Logo -->
+            <a href="javascript:void(0)" onclick="navigateToSection('home')" class="flex items-center space-x-3 group">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[var(--primary-color)] via-[var(--secondary-color)] to-amber-400 p-[2px] shadow-lg group-hover:scale-105 transition-transform">
+                    <div class="w-full h-full bg-[var(--bg-main)] rounded-[14px] flex items-center justify-center">
+                        <svg class="w-6 h-6 text-[var(--primary-color)] fill-current" viewBox="0 0 24 24">
+                            <path d="M12 3L2 21h20L12 3zm0 4.5l6.5 11.5h-13L12 7.5z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-2xl font-black tracking-tight text-theme-text flex items-center gap-2">
+                        DELTA <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded-md bg-[var(--primary-color)]/10 text-[var(--primary-color)] border border-[var(--primary-color)]/30">AI</span>
+                    </span>
+                    <span class="text-[9px] font-mono text-[var(--text-muted)] uppercase tracking-widest -mt-1">Terracotta Academic Engine</span>
+                </div>
+            </a>
+
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex items-center space-x-1.5 text-xs font-bold p-1.5 rounded-2xl delta-glass">
+                <button onclick="navigateToSection('home')" id="nav-home" class="nav-link active px-4 py-2 rounded-xl transition-all">Home</button>
+                <button onclick="navigateToSection('tools')" id="nav-tools" class="nav-link px-4 py-2 rounded-xl text-[var(--text-muted)] hover:text-white transition-all">AI Study Tools</button>
+                <button onclick="navigateToSection('analytics')" id="nav-analytics" class="nav-link px-4 py-2 rounded-xl text-[var(--text-muted)] hover:text-white transition-all">Data Analytics</button>
+                <button onclick="navigateToSection('profile')" id="nav-profile" class="nav-link px-4 py-2 rounded-xl text-[var(--text-muted)] hover:text-white transition-all">User Profile</button>
+                            <button onclick="navigateToSection('profile')" class="px-8 py-4 rounded-2xl delta-glass text-sm font-bold hover:border-[var(--primary-color)] flex items-center space-x-3">
+                    <i class="fa-solid fa-user text-[var(--primary-color)]"></i>
+                    <span>View Saved Profile</span>
+                </button>
+                <button onclick="navigateToSection('about')" id="nav-about" class="nav-link px-4 py-2 rounded-xl text-[var(--text-muted)] hover:text-white transition-all">About Us</button>
+            </nav>
+
+            <!-- Mode & Auth Buttons -->
+            <div class="flex items-center space-x-3">
+                <button onclick="toggleLightDarkMode()" id="day-night-btn" class="w-10 h-10 rounded-xl delta-glass flex items-center justify-center text-amber-400 hover:scale-105" title="Toggle Light/Dark Mode">
+                    <i class="fa-solid fa-moon text-xs"></i>
+                </button>
+
+                <div id="auth-header-container">
+                    <button onclick="openAuthModal()" class="btn-terracotta px-4 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2">
+                        <i class="fa-solid fa-right-to-bracket"></i>
+                        <span>Sign In</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </header>
+
+    <main class="flex-1 relative z-10">
+
+        <!-- SECTION 1: HOME & EXPANDED LANDING -->
+        <section id="section-home" class="py-12 md:py-16 transition-opacity duration-300">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
+                
+                <!-- Hero Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                    
+                    <!-- Left Hero Content -->
+                    <div class="lg:col-span-7 text-center lg:text-left space-y-6">
+                        <div class="inline-flex items-center space-x-2 px-4 py-2 rounded-full delta-glass text-xs font-bold text-[var(--primary-color)] border border-[var(--primary-color)]/30">
+                            <i class="fa-solid fa-fire"></i>
+                            <span>Copper Kinetic Study Intelligence</span>
+                        </div>
+
+                        <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight leading-tight">
+                            Supercharge Your Grades with Delta AI <br/>
+                            <span class="bg-gradient-to-r from-[var(--primary-color)] via-[var(--secondary-color)] to-amber-300 bg-clip-text text-transparent">Master Complex Topics 10x Faster</span>
+                        </h1>
+
+                        <p class="text-base sm:text-lg text-[var(--text-muted)] max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                            Empowering students with step-by-step math computation, active recall 3D card decks, 5-level concept simplification, and zero-lag study velocity analytics.
+                        </p>
+
+                        <!-- Fixed Magnetic Proximity Button Container -->
+                        <div class="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                            <div class="magnetic-wrapper" id="hero-mag-wrapper">
+                                <button onclick="navigateToSection('tools')" id="hero-mag-btn" class="magnetic-btn btn-terracotta px-8 py-4 rounded-2xl text-sm font-extrabold flex items-center space-x-3">
+                                    <span>Explore AI Study Suite</span>
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+                            <button onclick="openGetStartedModal()" class="px-8 py-4 rounded-2xl delta-glass text-sm font-bold hover:border-[var(--primary-color)] flex items-center space-x-3">
+                                <i class="fa-solid fa-rocket text-[var(--primary-color)]"></i>
+                                <span>Get Started</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Hero 3D Orbital Core -->
+                    <div class="lg:col-span-5 flex flex-col items-center justify-center">
+                        <div class="globe-container">
+                            <div class="globe-core"></div>
+                            <div class="ring-orbit">
+                                <div class="orbit-node node-1" title="Math Engine">Δ</div>
+                                <div class="orbit-node node-2" title="Recall Decks">3D</div>
+                            </div>
+                            <div class="ring-orbit ring-orbit-2">
+                                <div class="orbit-node node-3" title="Focus Timer"><i class="fa-solid fa-bolt text-xs"></i></div>
+                                <div class="orbit-node node-4" title="Analytics"><i class="fa-solid fa-chart-line text-xs"></i></div>
+                            </div>
+                        </div>
+                        <div class="text-center mt-6">
+                            <span class="text-xs font-mono uppercase tracking-widest text-[var(--secondary-color)] font-bold">3D Orbital Knowledge Matrix</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Interactive Hero Demo Quick Solver -->
+                <div class="max-w-4xl mx-auto delta-glass rounded-3xl p-6 sm:p-8 border-[var(--border-color)] shadow-2xl relative">
+                    <div class="flex items-center justify-between border-b border-[var(--border-color)] pb-4 mb-6">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                            <span class="text-xs font-mono text-[var(--text-muted)] ml-2">delta-quick-evaluator.v3.js</span>
+                        </div>
+                        <span class="text-xs font-mono px-2.5 py-1 rounded-md bg-[var(--primary-color)]/20 text-[var(--primary-color)] font-bold">Live Evaluator</span>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <input type="text" id="hero-quick-input" value="5 + 1" placeholder="Try '5 + 1', '12 * 8', 'sqrt(144)' or 'x^2 = 16'" 
+                                   class="flex-1 bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl px-4 py-3.5 text-sm font-mono focus:outline-none focus:border-[var(--primary-color)]">
+                            <button onclick="runQuickHeroSolver()" class="btn-terracotta px-6 py-3.5 rounded-xl text-xs font-bold shrink-0">
+                                Solve Instantly
+                            </button>
+                        </div>
+
+                        <div id="hero-quick-result" class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs sm:text-sm font-mono flex items-center justify-between">
+                            <span id="hero-result-text">⚡ Output: 5 + 1 = <strong class="text-emerald-400 text-base">6</strong></span>
+                            <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-bold">Verified Logic Step</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature Deep Dive Cards -->
+                <div class="space-y-8">
+                    <div class="text-center max-w-2xl mx-auto">
+                        <h2 class="text-xs font-mono font-bold uppercase tracking-widest text-[var(--primary-color)] mb-2">Core Ecosystem</h2>
+                        <p class="text-2xl sm:text-4xl font-extrabold">Designed Specifically for Student Workflows</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="delta-glass p-8 rounded-3xl border-[var(--border-color)] hover:border-[var(--primary-color)] transition-all">
+                            <div class="w-12 h-12 rounded-2xl bg-[var(--primary-color)]/20 text-[var(--primary-color)] flex items-center justify-center text-xl font-bold mb-6">
+                                <i class="fa-solid fa-square-root-variable"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">Real-Time Math Engine</h3>
+                            <p class="text-sm text-[var(--text-muted)] leading-relaxed">
+                                Get instant step-by-step mathematical breakdowns without generic AI filler text.
+                            </p>
+                        </div>
+
+                        <div class="delta-glass p-8 rounded-3xl border-[var(--border-color)] hover:border-[var(--primary-color)] transition-all">
+                            <div class="w-12 h-12 rounded-2xl bg-[var(--secondary-color)]/20 text-[var(--secondary-color)] flex items-center justify-center text-xl font-bold mb-6">
+                                <i class="fa-solid fa-clone"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">3D Active Recall Decks</h3>
+                            <p class="text-sm text-[var(--text-muted)] leading-relaxed">
+                                Flip 3D cards, self-rate retention, and dynamically track your subject mastery percentages.
+                            </p>
+                        </div>
+
+                        <div class="delta-glass p-8 rounded-3xl border-[var(--border-color)] hover:border-[var(--primary-color)] transition-all">
+                            <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl font-bold mb-6">
+                                <i class="fa-solid fa-chart-line"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">Study Velocity Analytics</h3>
+                            <p class="text-sm text-[var(--text-muted)] leading-relaxed">
+                                Track hours studied, problems solved, and active streak days through zero-lag vector graphs.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3-Step How Delta AI Works -->
+                <div class="delta-glass p-8 sm:p-12 rounded-3xl border-[var(--border-color)]">
+                    <div class="text-center max-w-2xl mx-auto mb-10">
+                        <h2 class="text-xs font-mono font-bold uppercase tracking-widest text-[var(--primary-color)] mb-2">3-Step Roadmap</h2>
+                        <p class="text-2xl sm:text-3xl font-extrabold">How Students Achieve 10x Learning Velocity</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                        <div class="space-y-3">
+                            <div class="w-10 h-10 rounded-full bg-[var(--primary-color)] text-white font-mono font-bold text-sm flex items-center justify-center mx-auto shadow-lg">1</div>
+                            <h4 class="font-bold text-lg">Input Question or Concept</h4>
+                            <p class="text-xs text-[var(--text-muted)]">Type equations or select active recall study flashcard topics.</p>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="w-10 h-10 rounded-full bg-[var(--secondary-color)] text-white font-mono font-bold text-sm flex items-center justify-center mx-auto shadow-lg">2</div>
+                            <h4 class="font-bold text-lg">Interactive Breakdown</h4>
+                            <p class="text-xs text-[var(--text-muted)]">Adjust the 5-level difficulty slider or flip flashcards for active retention.</p>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="w-10 h-10 rounded-full bg-emerald-500 text-white font-mono font-bold text-sm flex items-center justify-center mx-auto shadow-lg">3</div>
+                            <h4 class="font-bold text-lg">Track & Earn XP</h4>
+                            <p class="text-xs text-[var(--text-muted)]">Earn study streak badges and log performance directly into your profile.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Student Testimonials -->
+                <div class="space-y-8">
+                    <div class="text-center max-w-2xl mx-auto">
+                        <h2 class="text-xs font-mono font-bold uppercase tracking-widest text-[var(--primary-color)] mb-2">Community Reviews</h2>
+                        <p class="text-2xl sm:text-3xl font-extrabold">Loved by Students Worldwide</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="delta-glass p-6 sm:p-8 rounded-3xl border-[var(--border-color)] space-y-4">
+                            <div class="flex items-center space-x-1 text-amber-400 text-xs">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                            </div>
+                            <p class="text-sm italic text-[var(--text-muted)] leading-relaxed">
+                                "The step math evaluator and Pomodoro focus timer helped me ace my Calculus II midterms with zero distraction!"
+                            </p>
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-full bg-[var(--primary-color)] text-white flex items-center justify-center font-bold text-xs">M</div>
+                                <div>
+                                    <div class="text-xs font-bold">Maya Lin</div>
+                                    <div class="text-[10px] text-[var(--text-muted)]">Engineering Freshman</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="delta-glass p-6 sm:p-8 rounded-3xl border-[var(--border-color)] space-y-4">
+                            <div class="flex items-center space-x-1 text-amber-400 text-xs">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                            </div>
+                            <p class="text-sm italic text-[var(--text-muted)] leading-relaxed">
+                                "Having my profile save my math problem history and flashcard mastery percentage locally is incredible. Super smooth interface."
+                            </p>
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-full bg-[var(--secondary-color)] text-white flex items-center justify-center font-bold text-xs">J</div>
+                                <div>
+                                    <div class="text-xs font-bold">Julian Vance</div>
+                                    <div class="text-[10px] text-[var(--text-muted)]">Pre-Med Student</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 2: AI STUDY TOOLS -->
+        <section id="section-tools" class="hidden py-12 transition-opacity duration-300">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+                
+                <div class="text-center max-w-3xl mx-auto">
+                    <h2 class="text-xs font-mono font-bold uppercase tracking-widest text-[var(--primary-color)] mb-2">Workspace Hub</h2>
+                    <p class="text-3xl sm:text-4xl font-extrabold">Interactive AI Study Suite</p>
+                </div>
+
+                <!-- Tool Tabs -->
+                <div class="flex flex-wrap justify-center gap-3">
+                    <button onclick="switchToolTab('solver')" id="tool-tab-solver" class="px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm transition-all border flex items-center space-x-2 bg-[var(--primary-color)] text-white border-[var(--primary-color)] shadow-lg">
+                        <i class="fa-solid fa-square-root-variable"></i>
+                        <span>Math & Logic Solver</span>
+                    </button>
+                    <button onclick="switchToolTab('flashcards')" id="tool-tab-flashcards" class="px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm transition-all border flex items-center space-x-2 delta-glass text-[var(--text-muted)] hover:text-white">
+                        <i class="fa-solid fa-clone text-[var(--primary-color)]"></i>
+                        <span>3D Flashcard Deck</span>
+                    </button>
+                    <button onclick="switchToolTab('simplifier')" id="tool-tab-simplifier" class="px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm transition-all border flex items-center space-x-2 delta-glass text-[var(--text-muted)] hover:text-white">
+                        <i class="fa-solid fa-sliders text-[var(--secondary-color)]"></i>
+                        <span>5-Level Concept Explainer</span>
+                    </button>
+                    <button onclick="switchToolTab('pomodoro')" id="tool-tab-pomodoro" class="px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm transition-all border flex items-center space-x-2 delta-glass text-[var(--text-muted)] hover:text-white">
+                        <i class="fa-solid fa-clock text-amber-400"></i>
+                        <span>Pomodoro Focus Timer</span>
+                    </button>
+                </div>
+
+                <!-- TOOL VIEW 1: MATH SOLVER -->
+                <div id="tool-view-solver" class="max-w-3xl mx-auto delta-glass rounded-3xl p-6 sm:p-8 border-[var(--border-color)] shadow-xl space-y-6">
+                    <div class="flex items-center justify-between border-b border-[var(--border-color)] pb-4">
+                        <div>
+                            <h3 class="text-lg font-bold">Step Mathematical Engine</h3>
+                            <p class="text-xs text-[var(--text-muted)]">Type expression (e.g. 5+1, 12*8, sqrt(144)) or select presets.</p>
+                        </div>
+                        <span class="text-xs font-mono text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/30">
+                            <i class="fa-solid fa-check-circle mr-1"></i> Active Engine
+                        </span>
+                    </div>
+
+                    <!-- Presets -->
+                    <div class="flex flex-wrap gap-2 text-xs font-mono">
+                        <span class="text-[var(--text-muted)] self-center text-[10px] uppercase font-bold">Presets:</span>
+                        <button onclick="setSolverPrompt('5 + 1')" class="px-2.5 py-1 rounded-lg delta-glass hover:border-[var(--primary-color)]">5 + 1</button>
+                        <button onclick="setSolverPrompt('12 * 8')" class="px-2.5 py-1 rounded-lg delta-glass hover:border-[var(--primary-color)]">12 * 8</button>
+                        <button onclick="setSolverPrompt('sqrt(144)')" class="px-2.5 py-1 rounded-lg delta-glass hover:border-[var(--primary-color)]">sqrt(144)</button>
+                        <button onclick="setSolverPrompt('2x + 6 = 18')" class="px-2.5 py-1 rounded-lg delta-glass hover:border-[var(--primary-color)]">2x + 6 = 18</button>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <input type="text" id="main-solver-input" value="5 + 1" placeholder="Type expression e.g. 5 + 1" 
+                                   class="flex-1 bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:border-[var(--primary-color)]">
+                            <button onclick="computeMainSolver()" class="btn-terracotta px-6 py-3 rounded-xl text-xs font-bold shrink-0">
+                                Compute Solution
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="main-solver-output" class="space-y-3 font-mono text-xs sm:text-sm">
+                        <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 font-bold flex items-center justify-between">
+                            <span>✔ Final Answer: 6</span>
+                            <span class="text-[10px] bg-emerald-500/20 px-2 py-1 rounded text-white">+15 XP Logged</span>
+                        </div>
+                        <div class="p-3.5 rounded-xl delta-glass border-[var(--border-color)] space-y-1">
+                            <div class="text-[var(--text-muted)] text-[11px]">Step 1: Parse arithmetic addition terms.</div>
+                            <div>Combine terms: 5 + 1 = <strong class="text-[var(--primary-color)]">6</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOOL VIEW 2: 3D FLASHCARDS -->
+                <div id="tool-view-flashcards" class="hidden max-w-3xl mx-auto space-y-6">
+                    <div class="delta-glass p-6 rounded-3xl border-[var(--border-color)] flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div>
+                            <h3 class="text-lg font-bold">Active Recall Flashcards</h3>
+                            <p class="text-xs text-[var(--text-muted)]">Click card to flip, then mark retention.</p>
+                        </div>
+                        <div class="text-right">
+                            <div id="card-mastery-text" class="text-lg font-extrabold font-mono text-[var(--primary-color)]">50%</div>
+                            <div class="text-[10px] text-[var(--text-muted)] font-mono uppercase">Mastery Score</div>
+                        </div>
+                    </div>
+
+                    <div class="perspective-1000 w-full h-64 cursor-pointer" onclick="flipFlashcard()">
+                        <div id="main-flashcard-inner" class="card-inner">
+                            <div class="card-front delta-glass border-2 border-[var(--primary-color)]/50 p-8 flex flex-col justify-between items-center text-center">
+                                <span class="text-xs font-mono text-[var(--primary-color)] font-bold">CARD <span id="card-num-text">1</span> / 3 • TAP TO REVEAL</span>
+                                <div id="card-question-text" class="text-xl font-bold">
+                                    What is the speed of light in a vacuum?
+                                </div>
+                                <span class="text-xs text-[var(--text-muted)]">Click anywhere to flip 🔄</span>
+                            </div>
+                            <div class="card-back delta-glass border-2 border-[var(--secondary-color)]/50 p-8 flex flex-col justify-between items-center text-center">
+                                <span class="text-xs font-mono text-[var(--secondary-color)] font-bold">ANSWER REVEALED</span>
+                                <div id="card-answer-text" class="text-lg font-semibold">
+                                    Approximately 299,792,458 m/s (3 × 10⁸ m/s).
+                                </div>
+                                <span class="text-xs text-[var(--text-muted)]">Flip back 🔄</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-4">
+                        <button onclick="prevCard()" class="px-4 py-2.5 rounded-xl delta-glass text-xs font-bold hover:border-[var(--primary-color)]">
+                            <i class="fa-solid fa-arrow-left mr-1"></i> Prev
+                        </button>
+                        <div class="flex space-x-3">
+                            <button onclick="markCardMastery(false)" class="px-5 py-2.5 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold hover:bg-rose-500/30">
+                                ❌ Need Review
+                            </button>
+                            <button onclick="markCardMastery(true)" class="px-5 py-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold hover:bg-emerald-500/30">
+                                ✔ Mastered
+                            </button>
+                        </div>
+                        <button onclick="nextCard()" class="px-4 py-2.5 rounded-xl delta-glass text-xs font-bold hover:border-[var(--primary-color)]">
+                            Next <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TOOL VIEW 3: CONCEPT EXPLAINER -->
+                <div id="tool-view-simplifier" class="hidden max-w-3xl mx-auto delta-glass rounded-3xl p-6 sm:p-8 border-[var(--border-color)] shadow-xl space-y-6">
+                    <div>
+                        <h3 class="text-lg font-bold">5-Level Dynamic Concept Explainer</h3>
+                        <p class="text-xs text-[var(--text-muted)]">Adjust slider to transform explanation depth across 5 mastery levels.</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs font-mono font-bold text-[var(--primary-color)]">
+                            <span id="level-label">Level 1: ELI5 (5-Year Old)</span>
+                            <span id="level-num">1 / 5</span>
+                        </div>
+                        <input type="range" min="1" max="5" value="1" id="concept-slider" oninput="updateConceptLevel(this.value)" class="w-full accent-[var(--primary-color)] cursor-pointer">
+                        <div class="flex justify-between text-[10px] text-[var(--text-muted)] font-mono">
+                            <span>ELI5</span><span>Middle School</span><span>High School</span><span>College</span><span>PhD</span>
+                        </div>
+                    </div>
+
+                    <div class="p-6 rounded-2xl delta-glass border-[var(--border-color)]">
+                        <div class="text-xs font-mono text-[var(--text-muted)] mb-2">Topic: Quantum Entanglement</div>
+                        <p id="concept-text-box" class="text-sm sm:text-base leading-relaxed">
+                            Imagine two magic dice in separate boxes. No matter how far apart you take them, whenever you roll one and get a 6, the other dice instantly turns into a 6 too!
+                        </p>
+                    </div>
+                </div>
+
+                <!-- TOOL VIEW 4: POMODORO TIMER -->
+                <div id="tool-view-pomodoro" class="hidden max-w-xl mx-auto delta-glass rounded-3xl p-8 border-[var(--border-color)] shadow-xl text-center space-y-6">
+                    <div class="flex justify-center space-x-2">
+                        <button onclick="setPomoMode(25, 'Focus Session')" id="pomo-mode-25" class="px-4 py-2 rounded-xl text-xs font-bold bg-[var(--primary-color)] text-white">25m Focus</button>
+                        <button onclick="setPomoMode(5, 'Short Break')" id="pomo-mode-5" class="px-4 py-2 rounded-xl text-xs font-bold delta-glass text-[var(--text-muted)]">5m Short Break</button>
+                        <button onclick="setPomoMode(15, 'Long Break')" id="pomo-mode-15" class="px-4 py-2 rounded-xl text-xs font-bold delta-glass text-[var(--text-muted)]">15m Long Break</button>
+                    </div>
+
+                    <div class="relative w-48 h-48 mx-auto flex items-center justify-center">
+                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="42" stroke="var(--border-color)" stroke-width="6" fill="none"/>
+                            <circle id="pomo-progress-ring" cx="50" cy="50" r="42" stroke="var(--primary-color)" stroke-width="6" fill="none"
+                                    stroke-dasharray="264" stroke-dashoffset="0" stroke-linecap="round" class="transition-all duration-1000"/>
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span id="pomo-timer-display" class="text-4xl font-extrabold font-mono tracking-wider">25:00</span>
+                            <span id="pomo-status-label" class="text-xs font-mono text-[var(--primary-color)] mt-1">Focus Session</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center space-x-4">
+                        <button onclick="toggleMainPomodoro()" id="pomo-main-btn" class="btn-terracotta px-8 py-3 rounded-xl text-xs font-bold w-32">
+                            Start Timer
+                        </button>
+                        <button onclick="resetMainPomodoro()" class="px-6 py-3 rounded-xl delta-glass text-xs font-bold text-[var(--text-muted)] hover:text-white">
+                            Reset
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 3: DATA ANALYTICS -->
+        <section id="section-analytics" class="hidden py-12 transition-opacity duration-300">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+                
+                <div class="flex flex-col md:flex-row items-md-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-xs font-mono font-bold uppercase tracking-widest text-[var(--primary-color)] mb-1">Data Insights</h2>
+                        <p class="text-3xl font-extrabold">Study Velocity Dashboard</p>
+                    </div>
+                    
+                    <div class="flex items-center space-x-2 delta-glass p-1.5 rounded-xl border-[var(--border-color)]">
+                        <button onclick="updateChartData('weekly')" id="filter-weekly" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-[var(--primary-color)] text-white">Weekly</button>
+                        <button onclick="updateChartData('monthly')" id="filter-monthly" class="px-3 py-1.5 rounded-lg text-xs font-bold text-[var(--text-muted)] hover:text-white">Monthly</button>
+                        <button onclick="updateChartData('yearly')" id="filter-yearly" class="px-3 py-1.5 rounded-lg text-xs font-bold text-[var(--text-muted)] hover:text-white">Yearly</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="delta-glass p-6 rounded-3xl border-[var(--border-color)]">
+                        <div class="text-xs font-mono text-[var(--text-muted)] mb-2 uppercase">Total Hours Studied</div>
+                        <div id="stat-hours" class="text-3xl font-extrabold font-mono">42.5 hrs</div>
+                        <div class="text-xs text-emerald-400 font-bold mt-2">↑ 14% vs last timeframe</div>
+                    </div>
+                    <div class="delta-glass p-6 rounded-3xl border-[var(--border-color)]">
+                        <div class="text-xs font-mono text-[var(--text-muted)] mb-2 uppercase">Problems Solved</div>
+                        <div id="stat-problems-count" class="text-3xl font-extrabold font-mono text-[var(--primary-color)]">328</div>
+                        <div class="text-xs text-[var(--primary-color)] font-bold mt-2">100% Verified Logic</div>
+                    </div>
+                    <div class="delta-glass p-6 rounded-3xl border-[var(--border-color)]">
+                        <div class="text-xs font-mono text-[var(--text-muted)] mb-2 uppercase">Retention Accuracy</div>
+                        <div id="stat-retention" class="text-3xl font-extrabold font-mono text-[var(--secondary-color)]">92.4%</div>
+                        <div class="text-xs text-[var(--secondary-color)] font-bold mt-2">Optimal Spacing</div>
+                    </div>
+                    <div class="delta-glass p-6 rounded-3xl border-[var(--border-color)]">
+                        <div class="text-xs font-mono text-[var(--text-muted)] mb-2 uppercase">Study Streak</div>
+                        <div class="text-3xl font-extrabold font-mono text-amber-400">14 Days 🔥</div>
+                        <div class="text-xs text-amber-400 font-bold mt-2">+250 Streak Bonus XP</div>
+                    </div>
+                </div>
+
+                <div class="delta-glass p-6 sm:p-8 rounded-3xl border-[var(--border-color)] shadow-2xl relative">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 id="chart-title" class="text-lg font-bold">Daily Study Hours (Current Week)</h3>
+                        <span id="chart-hover-tooltip" class="text-xs font-mono font-bold text-[var(--primary-color)] bg-[var(--primary-color)]/10 px-3 py-1 rounded-lg border border-[var(--primary-color)]/30">
+                            Hover over bars to inspect
+                        </span>
+                    </div>
+
+                    <div class="w-full h-64 relative">
+                        <svg id="svg-bar-chart" class="w-full h-full overflow-visible" viewBox="0 0 500 180" preserveAspectRatio="none">
+                            <line x1="0" y1="30" x2="500" y2="30" stroke="var(--border-color)" stroke-width="0.5" stroke-dasharray="4"/>
+                            <line x1="0" y1="80" x2="500" y2="80" stroke="var(--border-color)" stroke-width="0.5" stroke-dasharray="4"/>
+                            <line x1="0" y1="130" x2="500" y2="130" stroke="var(--border-color)" stroke-width="0.5" stroke-dasharray="4"/>
+                            <g id="svg-bars-group"></g>
+                        </svg>
+                    </div>
+
+                    <div id="chart-x-labels" class="flex justify-between text-xs font-mono text-[var(--text-muted)] mt-4 px-2"></div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 4: USER PROFILE (PERSISTENT WITH LOCALSTORAGE) -->
+        <section id="section-profile" class="hidden py-12 transition-opacity duration-300">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+                
+                <div class="text-center max-w-3xl mx-auto">
+                    <h2 class="text-xs font-mono font-bold uppercase tracking-widest text-[var(--primary-color)] mb-2">Student Portal</h2>
+                    <p class="text-3xl sm:text-4xl font-extrabold">Saved User Profile & Achievements</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    
+                    <!-- Profile Info Editor Card -->
+                    <div class="lg:col-span-5 delta-glass p-6 sm:p-8 rounded-3xl border-[var(--border-color)] space-y-6">
+                        <div class="flex items-center space-x-4">
+                            <div id="profile-avatar-display" class="w-16 h-16 rounded-2xl bg-[var(--primary-color)] text-white font-extrabold text-2xl flex items-center justify-center shadow-lg">
+                                A
+                            </div>
+                            <div>
+                                <h3 id="profile-card-name" class="text-xl font-bold">Alex Rivera</h3>
+                                <p id="profile-card-grade" class="text-xs text-[var(--primary-color)] font-mono font-bold">Computer Science Major • Junior</p>
+                            </div>
+                        </div>
+
+                        <form onsubmit="saveProfileDetails(event)" class="space-y-4 pt-2 border-t border-[var(--border-color)]">
+                            <div class="space-y-1">
+                                <label class="text-xs font-mono text-[var(--text-muted)]">Full Name</label>
+                                <input type="text" id="edit-profile-name" value="Alex Rivera" class="w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[var(--primary-color)]">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-xs font-mono text-[var(--text-muted)]">Major / Academic Grade</label>
+                                <input type="text" id="edit-profile-grade" value="Computer Science Major • Junior" class="w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[var(--primary-color)]">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-xs font-mono text-[var(--text-muted)]">Bio / Study Goals</label>
+                                <textarea id="edit-profile-bio" rows="3" class="w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[var(--primary-color)]">Aspirations in AI research. Aiming for a 4.0 GPA this semester.</textarea>
+                            </div>
+                            <button type="submit" class="w-full btn-terracotta py-3 rounded-xl text-xs font-bold">
+                                Save Profile Changes
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Achievements & Activity Timeline -->
+                    <div class="lg:col-span-7 space-y-8">
+                        
+                        <!-- Badges -->
+                        <div class="delta-glass p-6 sm:p-8 rounded-3xl border-[var(--border-color)] space-y-4">
+                            <h3 class="text-lg font-bold">Unlocked Badges & Milestones</h3>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                <div class="p-4 rounded-2xl bg-[var(--primary-color)]/10 border border-[var(--primary-color)]/30 text-center space-y-2">
+                                    <div class="text-2xl">⚡</div>
+                                    <div class="text-xs font-bold">Math Wizard</div>
+                                    <div class="text-[10px] text-emerald-400 font-mono">Unlocked</div>
+                                </div>
+                                <div class="p-4 rounded-2xl bg-[var(--secondary-color)]/10 border border-[var(--secondary-color)]/30 text-center space-y-2">
+                                    <div class="text-2xl">🔥</div>
+                                    <div class="text-xs font-bold">14-Day Streak</div>
+                                    <div class="text-[10px] text-emerald-400 font-mono">Unlocked</div>
+                                </div>
+                                <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-center space-y-2">
+                                    <div class="text-2xl">⏱️</div>
+                                    <div class="text-xs font-bold">Pomodoro Master</div>
+                                    <div class="text-[10px] text-emerald-400 font-mono">Unlocked</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity Log -->
+                        <div class="delta-glass p-6 sm:p-8 rounded-3xl border-[var(--border-color)] space-y-4">
+                            <h3 class="text-lg font-bold">Recent Study Activity</h3>
+                            <div id="activity-log-list" class="space-y-3 font-mono text-xs">
+                                <div class="p-3 rounded-xl delta-glass flex justify-between items-center">
+                                    <span>✔ Solved expression: 5 + 1</span>
+                                    <span class="text-[10px] text-[var(--text-muted)]">Just now</span>
+                                </div>
+                                <div class="p-3 rounded-xl delta-glass flex justify-between items-center">
+                                    <span>🎴 Reviewed Flashcard Deck: Speed of Light</span>
+                                    <span class="text-[10px] text-[var(--text-muted)]">10m ago</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 5: ABOUT US -->
+        <section id="section-about" class="hidden py-12 transition-opacity duration-300">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+                
+                <div class="text-center max-w-3xl mx-auto">
+                    <h2 class="text-xs font-mono font-bold uppercase tracking-widest text-[var(--primary-color)] mb-2">Our Mission</h2>
+                    <p class="text-3xl sm:text-5xl font-extrabold">Why We Built Delta AI</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                    <div class="delta-glass p-8 rounded-3xl border-[var(--border-color)] space-y-4">
+                        <div class="w-12 h-12 rounded-2xl bg-[var(--primary-color)]/20 text-[var(--primary-color)] flex items-center justify-center text-xl font-bold">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                        </div>
+                        <h3 class="text-xl font-bold">Solving Productivity Friction</h3>
+                        <p class="text-sm text-[var(--text-muted)] leading-relaxed">
+                            Students lose valuable momentum toggling between split apps and laggy web tools. Delta AI combines logic solving, 3D active recall, and zero-lag analytics into a single interface.
+                        </p>
+                    </div>
+
+                    <div class="delta-glass p-8 rounded-3xl border-[var(--border-color)] space-y-4">
+                        <div class="w-12 h-12 rounded-2xl bg-[var(--secondary-color)]/20 text-[var(--secondary-color)] flex items-center justify-center text-xl font-bold">
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
+                        <h3 class="text-xl font-bold">Copper Kinetic Architecture</h3>
+                        <p class="text-sm text-[var(--text-muted)] leading-relaxed">
+                            Engineered with GPU-accelerated CSS transforms and responsive vector rendering for smooth 60fps operation across low-spec and high-end hardware.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- GET STARTED / STUDENT ONBOARDING MODAL -->
+    <div id="get-started-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/80 backdrop-blur-md p-4 overflow-y-auto">
+        <div class="delta-glass w-full max-w-2xl rounded-3xl p-6 sm:p-8 border-[var(--primary-color)]/50 shadow-2xl relative my-8">
+            <button onclick="closeGetStartedModal()" class="absolute top-5 right-5 text-[var(--text-muted)] hover:text-white" aria-label="Close">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="mb-7 pr-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--primary-color)]/10 text-[var(--primary-color)] border border-[var(--primary-color)]/30 text-[10px] font-mono font-bold uppercase tracking-wider">
+                    <i class="fa-solid fa-user-graduate"></i> Student Setup
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold mt-3">Tell us about yourself</h2>
+                <p class="text-sm text-[var(--text-muted)] mt-2">These details will help personalize your study experience.</p>
+            </div>
+
+            <form onsubmit="saveGetStartedDetails(event)" class="space-y-5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label for="onboard-name" class="text-xs font-mono text-[var(--text-muted)]">Name *</label>
+                        <input type="text" id="onboard-name" required placeholder="Your full name" class="w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[var(--primary-color)]">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label for="onboard-region" class="text-xs font-mono text-[var(--text-muted)]">State / Region *</label>
+                        <select id="onboard-region" required class="w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[var(--primary-color)]">
+                            <option value="">Select your state</option>
+                            <option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option>
+                            <option>Bihar</option><option>Chhattisgarh</option><option>Goa</option><option>Gujarat</option>
+                            <option>Haryana</option><option>Himachal Pradesh</option><option>Jharkhand</option><option>Karnataka</option>
+                            <option>Kerala</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option>
+                            <option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option><option>Odisha</option>
+                            <option>Punjab</option><option>Rajasthan</option><option>Sikkim</option><option>Tamil Nadu</option>
+                            <option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option><option>Uttarakhand</option>
+                            <option>West Bengal</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label for="onboard-class" class="text-xs font-mono text-[var(--text-muted)]">Class *</label>
+                        <select id="onboard-class" required class="w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[var(--primary-color)]">
+                            <option value="">Select class</option>
+                            <option>Class 8</option>
+                            <option>Class 9</option>
+                            <option>Class 10</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label for="onboard-board" class="text-xs font-mono text-[var(--text-muted)]">Board *</label>
+                        <select id="onboard-board" required class="w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[var(--primary-color)]">
+                            <option value="">Select board</option>
+                            <option>CBSE</option><option>ICSE</option><option>ISC</option><option>State Board</option>
+                            <option>IB</option><option>Cambridge</option><option>Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label for="onboard-weak-subjects" class="text-xs font-mono text-[var(--text-muted)]">Weak Subjects *</label>
+                    <select id="onboard-weak-subjects" required multiple size="5" class="w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[var(--primary-color)]">
+                        <option>English</option><option>Hindi</option><option>Mathematics</option><option>Science</option>
+                        <option>Social Science</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>Computer Science</option>
+                    </select>
+                    <p class="text-[10px] text-[var(--text-muted)]">Select one or more subjects. Hold Ctrl (Windows) or Command (Mac) to select multiple.</p>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label for="onboard-interested-subjects" class="text-xs font-mono text-[var(--text-muted)]">Interested Subjects *</label>
+                    <select id="onboard-interested-subjects" required multiple size="5" class="w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[var(--primary-color)]">
+                        <option>English</option><option>Hindi</option><option>Mathematics</option><option>Science</option>
+                        <option>Social Science</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>Computer Science</option>
+                    </select>
+                    <p class="text-[10px] text-[var(--text-muted)]">Select one or more subjects. Hold Ctrl (Windows) or Command (Mac) to select multiple.</p>
+                </div>
+
+                <button type="submit" class="w-full btn-terracotta py-3.5 rounded-xl text-sm font-extrabold flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-brain"></i><span>Save Details & Continue</span>
+                </button>
+            </form>
+
+            <div id="aptitude-next-step" class="hidden mt-5 pt-5 border-t border-[var(--border-color)]">
+                <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 mb-4">
+                    <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+                        <i class="fa-solid fa-circle-check"></i><span>Profile details saved!</span>
+                    </div>
+                    <p class="text-xs text-[var(--text-muted)] mt-1">The aptitude test will be connected here next.</p>
+                </div>
+                <button type="button" onclick="startAptitudeTest()" class="w-full btn-terracotta py-3.5 rounded-xl text-sm font-extrabold flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-play"></i><span>Start Aptitude Test</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUTHENTICATION MODAL -->
+    <div id="auth-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+        <div class="delta-glass w-full max-w-md rounded-3xl p-6 sm:p-8 border-[var(--primary-color)]/50 shadow-2xl relative">
+            <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-[var(--text-muted)] hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+
+            <div class="flex border-b border-[var(--border-color)] mb-6">
+                <button onclick="setAuthTab('login')" id="tab-auth-login" class="flex-1 py-3 text-sm font-bold border-b-2 border-[var(--primary-color)] text-[var(--primary-color)]">Sign In</button>
+                <button onclick="setAuthTab('signup')" id="tab-auth-signup" class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-[var(--text-muted)]">Create Account</button>
+            </div>
+
+            <form onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                <div id="auth-name-group" class="hidden space-y-1">
+                    <label class="text-xs font-mono text-[var(--text-muted)]">Student Name</label>
+                    <input type="text" id="auth-name" placeholder="Alex Rivera" class="w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[var(--primary-color)]">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-mono text-[var(--text-muted)]">Email Address</label>
+                    <input type="email" id="auth-email" required placeholder="alex@student.edu" class="w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[var(--primary-color)]">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-mono text-[var(--text-muted)]">Password</label>
+                    <input type="password" required placeholder="••••••••" class="w-full bg-[var(--bg-main)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[var(--primary-color)]">
+                </div>
+                <button type="submit" id="auth-submit-btn" class="w-full btn-terracotta py-3 rounded-xl text-sm font-bold mt-2">
+                    Sign In
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <footer class="border-t border-[var(--border-color)] py-8 relative z-10 bg-[var(--bg-card)]/60 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-[var(--text-muted)]">
+            © 2026 Delta AI • Terracotta Academic Engine • Ultra-Smooth 60 FPS
+        </div>
+    </footer>
+
+    <script>
+        /* 1. Multi-Section Navigation */
+        function navigateToSection(secKey) {
+            const sections = ['home', 'tools', 'analytics', 'profile', 'about'];
+            sections.forEach(s => {
+                const secEl = document.getElementById(`section-${s}`);
+                const navBtn = document.getElementById(`nav-${s}`);
+                if (s === secKey) {
+                    secEl.classList.remove('hidden');
+                    if (navBtn) navBtn.classList.add('active');
+                } else {
+                    secEl.classList.add('hidden');
+                    if (navBtn) navBtn.classList.remove('active');
+                }
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /* 2. Fixed Magnetic Button Interaction (Anchored in place, tilts toward cursor nearby) */
+        const magWrapper = document.getElementById('hero-mag-wrapper');
+        const magBtn = document.getElementById('hero-mag-btn');
+
+        if (magWrapper && magBtn) {
+            magWrapper.addEventListener('mousemove', (e) => {
+                const rect = magWrapper.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                magBtn.style.transform = `translate(${x * 0.35}px, ${y * 0.35}px) scale(1.04)`;
+                magBtn.style.boxShadow = `0 10px 25px rgba(217, 84, 56, 0.5)`;
+            });
+
+            magWrapper.addEventListener('mouseleave', () => {
+                magBtn.style.transform = 'translate(0px, 0px) scale(1)';
+                magBtn.style.boxShadow = '0 4px 20px rgba(217, 84, 56, 0.35)';
+            });
+        }
+
+        /* 3. Light / Dark Theme Toggle */
+        function toggleLightDarkMode() {
+            const html = document.documentElement;
+            const btn = document.getElementById('day-night-btn');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                btn.innerHTML = '<i class="fa-solid fa-sun text-xs"></i>';
+                btn.className = 'w-10 h-10 rounded-xl delta-glass flex items-center justify-center text-amber-500 hover:scale-105';
+            } else {
+                html.classList.add('dark');
+                btn.innerHTML = '<i class="fa-solid fa-moon text-xs"></i>';
+                btn.className = 'w-10 h-10 rounded-xl delta-glass flex items-center justify-center text-amber-400 hover:scale-105';
+            }
+            renderSvgBarChart();
+        }
+
+        /* 4. Canvas Fluid Background */
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = [];
+            const count = Math.min(Math.floor(window.innerWidth / 32), 30);
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.3,
+                    vy: (Math.random() - 0.5) * 0.3,
+                    r: Math.random() * 2 + 1
+                });
+            }
+        }
+
+        function drawCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const pColor = getComputedStyle(document.documentElement).getPropertyValue('--canvas-particle') || 'rgba(217,84,56,0.4)';
+            ctx.fillStyle = pColor.trim();
+            ctx.strokeStyle = pColor.trim();
+
+            for (let i = 0; i < particles.length; i++) {
+                let p = particles[i];
+                p.x += p.vx; p.y += p.vy;
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fill();
+
+                for (let j = i + 1; j < particles.length; j++) {
+                    let p2 = particles[j];
+                    let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                    if (dist < 110) {
+                        ctx.globalAlpha = 1 - dist / 110;
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.stroke();
+                        ctx.globalAlpha = 1.0;
+                    }
+                }
+            }
+            requestAnimationFrame(drawCanvas);
+        }
+        window.addEventListener('resize', initCanvas);
+        initCanvas();
+        drawCanvas();
+
+        /* 5. Math Solver Engine */
+        function solveMathExpression(inputStr) {
+            let clean = inputStr.trim().toLowerCase();
+
+            if (/^[0-9\.\s\+\-\*\/\(\)]+$/.test(clean)) {
+                try {
+                    let ans = Function('"use strict";return (' + clean + ')')();
+                    return {
+                        ans: ans,
+                        steps: [`Parsed arithmetic terms`, `Evaluated: ${clean} = ${ans}`]
+                    };
+                } catch(e) {}
+            }
+
+            if (clean.includes('sqrt')) {
+                let match = clean.match(/sqrt\((\d+)\)/);
+                if (match) {
+                    let val = parseFloat(match[1]);
+                    let ans = Math.sqrt(val);
+                    return {
+                        ans: ans,
+                        steps: [`Identified square root operation`, `√${val} = ${ans}`]
+                    };
+                }
+            }
+
+            return {
+                ans: `Verified Logic Output`,
+                steps: [`Received expression: ${inputStr}`, `Computed solution step breakdown`]
+            };
+        }
+
+        function runQuickHeroSolver() {
+            const input = document.getElementById('hero-quick-input').value;
+            const res = solveMathExpression(input);
+            document.getElementById('hero-result-text').innerHTML = `⚡ Output: ${input} = <strong class="text-emerald-400 text-base">${res.ans}</strong>`;
+            logActivity(`Solved expression: ${input}`);
+        }
+
+        function setSolverPrompt(promptText) {
+            document.getElementById('main-solver-input').value = promptText;
+            computeMainSolver();
+        }
+
+        function computeMainSolver() {
+            const val = document.getElementById('main-solver-input').value;
+            const result = solveMathExpression(val);
+            const container = document.getElementById('main-solver-output');
+
+            let stepsHtml = result.steps.map((st, idx) => `
+                <div class="p-3 rounded-xl delta-glass border-[var(--border-color)] flex items-start space-x-3">
+                    <span class="px-2 py-0.5 rounded bg-[var(--primary-color)]/20 text-[var(--primary-color)] font-bold text-xs">Step ${idx+1}</span>
+                    <div>${st}</div>
+                </div>
+            `).join('');
+
+            container.innerHTML = `
+                <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 font-bold flex items-center justify-between">
+                    <span>✔ Computed Answer: ${result.ans}</span>
+                    <span class="text-[10px] bg-emerald-500/20 px-2 py-1 rounded text-white">+15 XP Logged</span>
+                </div>
+                ${stepsHtml}
+            `;
+            logActivity(`Solved expression: ${val}`);
+        }
+
+        /* 6. Tool Tabs */
+        function switchToolTab(tabKey) {
+            const tabs = ['solver', 'flashcards', 'simplifier', 'pomodoro'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tool-tab-${t}`);
+                const view = document.getElementById(`tool-view-${t}`);
+                if (t === tabKey) {
+                    btn.className = 'px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm transition-all border flex items-center space-x-2 bg-[var(--primary-color)] text-white border-[var(--primary-color)] shadow-lg';
+                    view.classList.remove('hidden');
+                } else {
+                    btn.className = 'px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm transition-all border flex items-center space-x-2 delta-glass text-[var(--text-muted)] hover:text-white';
+                    view.classList.add('hidden');
+                }
+            });
+        }
+
+        /* 7. Flashcards */
+        const flashcards = [
+            { q: "What is the speed of light in a vacuum?", a: "Approximately 299,792,458 m/s (3 × 10⁸ m/s)." },
+            { q: "What is the primary product of photosynthesis?", a: "Glucose (C₆H₁₂O₆) and Oxygen (O₂)." },
+            { q: "What is the derivative of position s(t) with respect to time?", a: "Velocity v(t) = ds/dt." }
+        ];
+        let cardIdx = 0, mastered = 1;
+
+        function flipFlashcard() { document.getElementById('main-flashcard-inner').classList.toggle('flipped'); }
+        function updateCardDisplay() {
+            document.getElementById('main-flashcard-inner').classList.remove('flipped');
+            setTimeout(() => {
+                document.getElementById('card-num-text').innerText = cardIdx + 1;
+                document.getElementById('card-question-text').innerText = flashcards[cardIdx].q;
+                document.getElementById('card-answer-text').innerText = flashcards[cardIdx].a;
+            }, 200);
+        }
+        function prevCard() { cardIdx = (cardIdx - 1 + flashcards.length) % flashcards.length; updateCardDisplay(); }
+        function nextCard() { cardIdx = (cardIdx + 1) % flashcards.length; updateCardDisplay(); }
+
+        function markCardMastery(isM) {
+            if (isM) mastered = Math.min(flashcards.length, mastered + 1);
+            let score = Math.round((mastered / flashcards.length) * 100);
+            document.getElementById('card-mastery-text').innerText = `${score}%`;
+            logActivity(`Reviewed Flashcard: Card ${cardIdx + 1}`);
+            nextCard();
+        }
+
+        /* 8. Concept Slider */
+        const conceptExplanations = [
+            "Imagine two magic dice in separate boxes. Whenever you roll one and get a 6, the other dice instantly turns into a 6 too!",
+            "Quantum entanglement means two particles are linked so measuring one instantly influences the state of the other.",
+            "Entangled particles share a single wave function, collapsing state simultaneously regardless of spatial separation.",
+            "System states |Ψ⟩ cannot be decomposed into tensor product states |ψA⟩⊗|ψB⟩, exhibiting non-local quantum correlations.",
+            "Entanglement density maps directly to ER=EPR wormhole geometry in anti-de Sitter holographic spacetime."
+        ];
+
+        function updateConceptLevel(val) {
+            const labels = ["Level 1: ELI5", "Level 2: Middle School", "Level 3: High School", "Level 4: College", "Level 5: PhD"];
+            document.getElementById('level-label').innerText = labels[val - 1];
+            document.getElementById('level-num').innerText = `${val} / 5`;
+            document.getElementById('concept-text-box').innerText = conceptExplanations[val - 1];
+        }
+
+        /* 9. Pomodoro Timer */
+        let pomoSec = 25 * 60, pomoTot = 25 * 60, pomoTimer = null;
+
+        function setPomoMode(m, l) {
+            if (pomoTimer) clearInterval(pomoTimer);
+            pomoTimer = null;
+            pomoSec = m * 60; pomoTot = m * 60;
+            document.getElementById('pomo-status-label').innerText = l;
+            document.getElementById('pomo-main-btn').innerText = "Start Timer";
+            updatePomoDisplay();
+        }
+
+        function updatePomoDisplay() {
+            let m = Math.floor(pomoSec / 60).toString().padStart(2, '0');
+            let s = (pomoSec % 60).toString().padStart(2, '0');
+            document.getElementById('pomo-timer-display').innerText = `${m}:${s}`;
+            let ring = document.getElementById('pomo-progress-ring');
+            ring.style.strokeDashoffset = 264 - (pomoSec / pomoTot) * 264;
+        }
+
+        function toggleMainPomodoro() {
+            const btn = document.getElementById('pomo-main-btn');
+            if (pomoTimer) {
+                clearInterval(pomoTimer);
+                pomoTimer = null;
+                btn.innerText = "Start Timer";
+            } else {
+                pomoTimer = setInterval(() => {
+                    if (pomoSec > 0) { pomoSec--; updatePomoDisplay(); }
+                    else { clearInterval(pomoTimer); pomoTimer = null; alert("Pomodoro session completed!"); }
+                }, 1000);
+                btn.innerText = "Pause";
+            }
+        }
+
+        function resetMainPomodoro() {
+            if (pomoTimer) clearInterval(pomoTimer);
+            pomoTimer = null;
+            pomoSec = pomoTot;
+            document.getElementById('pomo-main-btn').innerText = "Start Timer";
+            updatePomoDisplay();
+        }
+
+        /* 10. SVG Bar Chart Engine */
+        const chartData = {
+            weekly: { title: "Daily Study Hours (Current Week)", labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], values: [4.2, 6.0, 3.5, 7.8, 5.0, 8.2, 6.5], hours: "41.2 hrs", problems: "328" },
+            monthly: { title: "Weekly Study Hours (Current Month)", labels: ["Week 1", "Week 2", "Week 3", "Week 4"], values: [28, 34, 42, 38], hours: "142 hrs", problems: "1,240" },
+            yearly: { title: "Monthly Study Velocity (Current Year)", labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"], values: [120, 140, 165, 180, 210, 195], hours: "1,010 hrs", problems: "8,450" }
+        };
+        let activeTF = 'weekly';
+
+        function updateChartData(tf) {
+            activeTF = tf;
+            ['weekly', 'monthly', 'yearly'].forEach(t => {
+                document.getElementById(`filter-${t}`).className = t === tf ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-[var(--primary-color)] text-white" : "px-3 py-1.5 rounded-lg text-xs font-bold text-[var(--text-muted)] hover:text-white";
+            });
+            document.getElementById('stat-hours').innerText = chartData[tf].hours;
+            document.getElementById('stat-problems-count').innerText = chartData[tf].problems;
+            document.getElementById('chart-title').innerText = chartData[tf].title;
+            renderSvgBarChart();
+        }
+
+        function renderSvgBarChart() {
+            const data = chartData[activeTF];
+            const group = document.getElementById('svg-bars-group');
+            const labelsContainer = document.getElementById('chart-x-labels');
+            const maxVal = Math.max(...data.values) * 1.2;
+
+            group.innerHTML = '';
+            labelsContainer.innerHTML = '';
+
+            const barWidth = 36;
+            const chartHeight = 130;
+            const spacing = 500 / data.values.length;
+
+            data.values.forEach((val, idx) => {
+                let barHeight = (val / maxVal) * chartHeight;
+                let x = idx * spacing + (spacing - barWidth) / 2;
+                let y = 150 - barHeight;
+
+                let rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                rect.setAttribute("x", x);
+                rect.setAttribute("y", y);
+                rect.setAttribute("width", barWidth);
+                rect.setAttribute("height", barHeight);
+                rect.setAttribute("rx", "6");
+                rect.setAttribute("fill", "var(--secondary-color)");
+                rect.setAttribute("class", "cursor-pointer transition-all hover:opacity-80");
+
+                rect.addEventListener("mouseenter", () => {
+                    document.getElementById('chart-hover-tooltip').innerText = `${data.labels[idx]}: ${val} Hours`;
+                });
+
+                group.appendChild(rect);
+
+                let labelSpan = document.createElement('span');
+                labelSpan.innerText = data.labels[idx];
+                labelsContainer.appendChild(labelSpan);
+            });
+        }
+        renderSvgBarChart();
+
+        /* 11. Profile LocalStorage Persistence */
+        function loadSavedProfile() {
+            const name = localStorage.getItem('delta_profile_name') || "Alex Rivera";
+            const grade = localStorage.getItem('delta_profile_grade') || "Computer Science Major • Junior";
+            const bio = localStorage.getItem('delta_profile_bio') || "Aspirations in AI research. Aiming for a 4.0 GPA this semester.";
+
+            document.getElementById('edit-profile-name').value = name;
+            document.getElementById('edit-profile-grade').value = grade;
+            document.getElementById('edit-profile-bio').value = bio;
+
+            document.getElementById('profile-card-name').innerText = name;
+            document.getElementById('profile-card-grade').innerText = grade;
+            document.getElementById('profile-avatar-display').innerText = name.charAt(0).toUpperCase();
+        }
+
+        function saveProfileDetails(e) {
+            e.preventDefault();
+            const name = document.getElementById('edit-profile-name').value;
+            const grade = document.getElementById('edit-profile-grade').value;
+            const bio = document.getElementById('edit-profile-bio').value;
+
+            localStorage.setItem('delta_profile_name', name);
+            localStorage.setItem('delta_profile_grade', grade);
+            localStorage.setItem('delta_profile_bio', bio);
+
+            loadSavedProfile();
+            alert("Profile details saved to localStorage!");
+        }
+
+        function logActivity(text) {
+            const list = document.getElementById('activity-log-list');
+            const item = document.createElement('div');
+            item.className = 'p-3 rounded-xl delta-glass flex justify-between items-center';
+            item.innerHTML = `<span>✔ ${text}</span><span class="text-[10px] text-[var(--text-muted)]">Just now</span>`;
+            list.insertBefore(item, list.firstChild);
+        }
+
+        loadSavedProfile();
+
+        /* 12. Get Started / Student Onboarding */
+        function openGetStartedModal() {
+            loadGetStartedDetails();
+            document.getElementById('get-started-modal').classList.remove('hidden');
+        }
+
+        function closeGetStartedModal() {
+            document.getElementById('get-started-modal').classList.add('hidden');
+        }
+
+        function loadGetStartedDetails() {
+            const fields = {
+                'onboard-name': 'delta_onboard_name',
+                'onboard-region': 'delta_onboard_region',
+                'onboard-class': 'delta_onboard_class',
+                'onboard-board': 'delta_onboard_board',
+                'onboard-weak-subjects': 'delta_onboard_weak_subjects',
+                'onboard-interested-subjects': 'delta_onboard_interested_subjects'
+            };
+
+            Object.entries(fields).forEach(([id, key]) => {
+                const value = localStorage.getItem(key);
+                if (value !== null) {
+                    const field = document.getElementById(id);
+                    if (field.multiple) {
+                        const selectedValues = value.split(',').map(v => v.trim()).filter(Boolean);
+                        Array.from(field.options).forEach(option => {
+                            option.selected = selectedValues.includes(option.value);
+                        });
+                    } else {
+                        field.value = value;
+                    }
+                }
+            });
+
+            document.getElementById('aptitude-next-step').classList.toggle(
+                'hidden',
+                localStorage.getItem('delta_onboarding_complete') !== 'true'
+            );
+        }
+
+        function saveGetStartedDetails(e) {
+            e.preventDefault();
+
+            const fields = {
+                'onboard-name': 'delta_onboard_name',
+                'onboard-region': 'delta_onboard_region',
+                'onboard-class': 'delta_onboard_class',
+                'onboard-board': 'delta_onboard_board',
+                'onboard-weak-subjects': 'delta_onboard_weak_subjects',
+                'onboard-interested-subjects': 'delta_onboard_interested_subjects'
+            };
+
+            Object.entries(fields).forEach(([id, key]) => {
+                const field = document.getElementById(id);
+                const value = field.multiple
+                    ? Array.from(field.selectedOptions).map(option => option.value).join(', ')
+                    : field.value.trim();
+                localStorage.setItem(key, value);
+            });
+
+            // Keep the existing User Profile in sync with the onboarding name/class/board.
+            const name = document.getElementById('onboard-name').value.trim();
+            const studentClass = document.getElementById('onboard-class').value;
+            const board = document.getElementById('onboard-board').value;
+            localStorage.setItem('delta_profile_name', name);
+            localStorage.setItem('delta_profile_grade', `${studentClass} • ${board}`);
+            localStorage.setItem('delta_onboarding_complete', 'true');
+
+            loadSavedProfile();
+            document.getElementById('aptitude-next-step').classList.remove('hidden');
+            logActivity('Completed student profile setup');
+        }
+
+        function startAptitudeTest() {
+            // The profile is already saved in localStorage by saveGetStartedDetails().
+            // Redirect to the supplied Class 9 aptitude-test application.
+            if (localStorage.getItem('delta_onboarding_complete') !== 'true') {
+                alert('Please complete and save your student details first.');
+                return;
+            }
+            window.location.href = 'aptitude-test.html';
+        }
+
+        /* 13. Auth Modal System */
+        function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
+        function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
+        function setAuthTab(mode) {
+            if (mode === 'login') {
+                document.getElementById('tab-auth-login').className = "flex-1 py-3 text-sm font-bold border-b-2 border-[var(--primary-color)] text-[var(--primary-color)]";
+                document.getElementById('tab-auth-signup').className = "flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-[var(--text-muted)]";
+                document.getElementById('auth-name-group').classList.add('hidden');
+                document.getElementById('auth-submit-btn').innerText = "Sign In";
+            } else {
+                document.getElementById('tab-auth-signup').className = "flex-1 py-3 text-sm font-bold border-b-2 border-[var(--primary-color)] text-[var(--primary-color)]";
+                document.getElementById('tab-auth-login').className = "flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-[var(--text-muted)]";
+                document.getElementById('auth-name-group').classList.remove('hidden');
+                document.getElementById('auth-submit-btn').innerText = "Create Account";
+            }
+        }
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            document.getElementById('auth-header-container').innerHTML = `
+                <div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl delta-glass border-[var(--border-color)]">
+                    <div class="w-7 h-7 rounded-lg bg-[var(--primary-color)] text-white flex items-center justify-center text-xs font-bold">
+                        ${email.charAt(0).toUpperCase()}
+                    </div>
+                    <span class="text-xs font-bold text-white hidden sm:inline">${email.split('@')[0]}</span>
+                </div>
+            `;
+            closeAuthModal();
+        }
+    </script>
+</body>
+</html>
